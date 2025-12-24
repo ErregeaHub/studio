@@ -19,10 +19,14 @@ const cleanEnv = (val: string | undefined) => {
 };
 
 // Explicitly resolve the user to handle potential Vercel collisions
-const resolvedUser = cleanEnv(process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER);
+const rawUser = process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER;
+const resolvedUser = cleanEnv(rawUser);
 const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST);
 const resolvedPassword = cleanEnv(process.env.TIDB_PASSWORD || process.env.DB_PASSWORD);
 const resolvedDatabase = cleanEnv(process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE);
+
+// Diagnostic info for identifying which env var is being used
+const userSource = process.env.TIDB_USER ? 'TIDB_USER' : (process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : 'NONE'));
 
 const poolConfig: mysql.PoolOptions = {
   host: resolvedHost,
@@ -34,6 +38,7 @@ const poolConfig: mysql.PoolOptions = {
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
+    minVersion: 'TLSv1.2',
     rejectUnauthorized: false,
   },
   timezone: 'Z',
@@ -42,14 +47,15 @@ const poolConfig: mysql.PoolOptions = {
 
 // Enhanced Debug Log (masked)
 const userStatus = resolvedUser 
-  ? (resolvedUser.includes('.') ? `PREFIX_DETECTED (${resolvedUser.split('.')[0]}.***)` : 'NO_DOT_IN_USERNAME')
+  ? (resolvedUser.includes('.') ? `PREFIX_DETECTED (${resolvedUser.split('.')[0]}.***)` : `NO_DOT_IN_USERNAME (Value: ${resolvedUser})`)
   : 'UNDEFINED';
 
 console.log('--- TiDB Connection Diagnostic ---');
 console.log('Host:', resolvedHost);
+console.log('User Source:', userSource);
 console.log('User Status:', userStatus);
 console.log('Database:', resolvedDatabase);
-console.log('Source Priority: TIDB_USER > DB_USERNAME > DB_USER');
+console.log('SSL Config: minVersion=TLSv1.2, rejectUnauthorized=false');
 console.log('----------------------------------');
 
 // Create the connection pool
@@ -75,17 +81,27 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
     return results as T;
   } catch (error: any) {
     // Check for specific TiDB prefix error to provide better guidance
-    const msg = error.message?.toLowerCase() || '';
-    const isPrefixError = msg.includes('user name prefix') || msg.includes('prefix');
+    const errorMsg = error.message || '';
+    const errorCode = error.code || '';
+    const fullError = `${errorCode} ${errorMsg}`.toLowerCase();
     
-    console.error('Database Query Error:', {
+    const isPrefixError = fullError.includes('user name prefix') || 
+                         fullError.includes('prefix') || 
+                         (fullError.includes('er_unknown_error') && (userStatus.includes('NO_DOT') || userStatus === 'UNDEFINED'));
+    
+    console.error('Database Query Error Details:', {
       message: error.message,
       code: error.code,
       userStatus: userStatus,
-      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user". Check your environment variables.' : undefined
+      userSource: userSource,
+      isPrefixError: isPrefixError
     });
     
-    throw new Error(isPrefixError ? `TiDB Configuration Error: ${error.message}` : `Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
+    if (isPrefixError) {
+      throw new Error(`TiDB Configuration Error: Missing user name prefix. Current user from ${userSource} is "${resolvedUser}". TiDB Cloud requires the format "prefix.user".`);
+    }
+    
+    throw new Error(`Database operation failed: ${error.code || 'UNKNOWN_ERROR'} (${error.message})`);
   }
 }
 
