@@ -24,7 +24,7 @@ const resolvedPort = cleanEnv(process.env.DB_PORT || process.env.DATABASE_PORT |
 const resolvedUser = cleanEnv(process.env.DB_USERNAME || process.env.DB_USER || process.env.DATABASE_USERNAME || process.env.DATABASE_USER || process.env.TIDB_USER);
 const resolvedPassword = cleanEnv(process.env.DB_PASSWORD || process.env.DATABASE_PASSWORD || process.env.TIDB_PASSWORD);
 const resolvedDatabase = cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE || process.env.DATABASE_NAME || process.env.TIDB_DATABASE || process.env.TIDB_NAME);
-const useSSL = cleanEnv(process.env.DB_SSL || process.env.DATABASE_SSL) !== 'false'; // Default to true for TiDB Cloud
+const useSSL = cleanEnv(process.env.DB_SSL || process.env.DATABASE_SSL) !== 'true'; // Default to true for TiDB Cloud
 
 const poolConfig: mysql.PoolOptions = {
   host: resolvedHost,
