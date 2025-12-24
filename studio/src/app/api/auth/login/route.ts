@@ -21,6 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
 
+    if (!user.is_verified) {
+      return NextResponse.json({ error: 'Account not verified. Please check your email.' }, { status: 403 });
+    }
+
     // Exclude sensitive information like password_hash before returning
     const { password_hash, verification_token, ...userWithoutSensitiveData } = user;
 

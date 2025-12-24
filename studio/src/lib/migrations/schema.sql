@@ -68,3 +68,39 @@ CREATE TABLE IF NOT EXISTS schema_migrations (
     description VARCHAR(255),
     applied_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Follows Table
+-- Stores user follow relationships.
+CREATE TABLE IF NOT EXISTS follows (
+    follower_id BIGINT UNSIGNED NOT NULL,
+    following_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (follower_id, following_id),
+    CONSTRAINT fk_follows_follower FOREIGN KEY (follower_id) REFERENCES user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_follows_following FOREIGN KEY (following_id) REFERENCES user_accounts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Media Likes Table
+-- Stores likes on media contents.
+CREATE TABLE IF NOT EXISTS media_likes (
+    user_id BIGINT UNSIGNED NOT NULL,
+    media_id BIGINT UNSIGNED NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, media_id),
+    CONSTRAINT fk_likes_user FOREIGN KEY (user_id) REFERENCES user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_likes_media FOREIGN KEY (media_id) REFERENCES media_contents(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Notifications Table
+-- Stores user notifications for various events.
+CREATE TABLE IF NOT EXISTS notifications (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    recipient_id BIGINT UNSIGNED NOT NULL,
+    actor_id BIGINT UNSIGNED NOT NULL,
+    type ENUM('follow', 'comment', 'like') NOT NULL,
+    reference_id BIGINT UNSIGNED,
+    is_read TINYINT(1) DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notif_recipient FOREIGN KEY (recipient_id) REFERENCES user_accounts(id) ON DELETE CASCADE,
+    CONSTRAINT fk_notif_actor FOREIGN KEY (actor_id) REFERENCES user_accounts(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -56,7 +56,15 @@ export class UserRepository extends BaseRepository<User> {
     return results.length > 0 ? results[0] : null;
   }
 
-  async update(id: number, data: Partial<UserInput>): Promise<User | null> {
+  async findByVerificationToken(token: string): Promise<User | null> {
+    const results = await query<User[]>(
+      `SELECT * FROM ${this.tableName} WHERE verification_token = ?`,
+      [token]
+    );
+    return results.length > 0 ? results[0] : null;
+  }
+
+  async update(id: number, data: Partial<UserInput & { is_verified?: boolean; verification_token?: string | null }>): Promise<User | null> {
     const fields = Object.keys(data);
     if (fields.length === 0) return this.findById(id);
 

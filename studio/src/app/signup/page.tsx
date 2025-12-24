@@ -68,7 +68,7 @@ export default function SignupPage() {
         title: 'Registration Successful!',
         description: 'Please check your email to verify your account.',
       });
-      setIsSuccess(true);
+      router.push('/verify-email');
     } catch (error: any) {
       toast({
         variant: 'destructive',

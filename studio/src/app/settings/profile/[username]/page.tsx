@@ -34,7 +34,7 @@ const ProfileSettingsPage = () => {
     const fetchProfileUser = async () => {
       if (username) {
         try {
-          const response = await fetch(`/api/users/username/${username}`);
+          const response = await fetch(`/api/users/${username}`);
           if (!response.ok) {
             throw new Error('Failed to fetch profile user');
           }

@@ -8,8 +8,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MediaCard from '@/components/media-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, UserPlus, UserCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
@@ -17,9 +18,66 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const [mediaList, setMediaList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
- 
+  const [showCreatePostModal, setShowCreatePostModal] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const { toast } = useToast();
 
   const { user: currentUser, isLoading: isCurrentUserLoading } = useAuth();
+
+  const fetchStats = useCallback(async (userId: number) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/stats`);
+      if (response.ok) {
+        const data = await response.json();
+        setFollowersCount(data.followersCount);
+        setFollowingCount(data.followingCount);
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  }, []);
+
+  const checkFollowStatus = useCallback(async (userId: number, currentUserId: number) => {
+    try {
+      const response = await fetch(`/api/users/${userId}/follow?follower_id=${currentUserId}`);
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+      }
+    } catch (error) {
+      console.error('Failed to check follow status:', error);
+    }
+  }, []);
+
+  const handleFollow = async () => {
+    if (!currentUser || !user) return;
+
+    try {
+      const response = await fetch(`/api/users/${user.id}/follow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followerId: currentUser.id })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+        setFollowersCount(prev => data.isFollowing ? prev + 1 : prev - 1);
+        toast({
+          title: data.isFollowing ? "Followed" : "Unfollowed",
+          description: data.isFollowing ? `You are now following ${user.display_name}` : `You unfollowed ${user.display_name}`
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update follow status",
+        variant: "destructive"
+      });
+    }
+  };
 
   useEffect(() => {
     async function fetchProfile() {
@@ -32,6 +90,9 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
         const data = await response.json();
         setUser(data.user);
         setMediaList(data.media);
+        
+        // Fetch stats
+        fetchStats(data.user.id);
       } catch (error) {
         console.error('Failed to fetch profile:', error);
         setError(true);
@@ -40,7 +101,13 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
       }
     }
     fetchProfile();
-  }, [username]);
+  }, [username, fetchStats]);
+
+  useEffect(() => {
+    if (user && currentUser && !isCurrentUserLoading) {
+      checkFollowStatus(parseInt(user.id), parseInt(currentUser.id));
+    }
+  }, [user, currentUser, isCurrentUserLoading, checkFollowStatus]);
 
   if (error) {
     notFound();
@@ -83,11 +150,41 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
         </div>
         <h1 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">{user.display_name}</h1>
         
-        <div className="flex items-center gap-3 mb-6">
+        <div className="flex items-center gap-3 mb-4">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">@{user.username}</span>
           <span className="h-1 w-1 rounded-full bg-muted-foreground/30"></span>
           <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{mediaList.length} Posts</span>
         </div>
+
+        <div className="flex items-center gap-6 mb-6 text-sm">
+          <div className="flex flex-col items-center">
+            <span className="font-black text-lg">{followersCount}</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">Followers</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="font-black text-lg">{followingCount}</span>
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">Following</span>
+          </div>
+        </div>
+
+        {currentUser && currentUser.id !== user.id && (
+          <Button 
+            onClick={handleFollow}
+            variant={isFollowing ? "outline" : "default"}
+            className="mb-6 rounded-full px-8 font-bold uppercase tracking-widest"
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck className="mr-2 h-4 w-4" /> Following
+              </>
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-4 w-4" /> Follow
+              </>
+            )}
+          </Button>
+        )}
+
         {user.bio && (
           <p className="max-w-xl text-sm md:text-base text-muted-foreground leading-relaxed font-medium">
             {user.bio}

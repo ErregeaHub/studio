@@ -102,8 +102,8 @@ export default function Home() {
                   mediaType: (mediaItem.type as 'photo' | 'video') || 'photo',
                   createdAt: new Date(mediaItem.created_at),
                   user: {
-                    name: mediaItem.uploader_name || 'Anonymous',
-                    handle: mediaItem.uploader_username || 'anonymous',
+                    name: mediaItem.display_name || 'Anonymous', // Use display_name
+                    handle: mediaItem.username || 'anonymous', // Use username
                     avatar: mediaItem.uploader_avatar || ''
                   },
                   likes: mediaItem.likes_count || 0,

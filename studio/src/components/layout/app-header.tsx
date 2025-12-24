@@ -15,6 +15,7 @@ import { Upload, LogOut, Menu } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/components/ui/sidebar';
+import NotificationBell from '@/components/notifications/notification-bell';
 
 export default function AppHeader() {
   const { user, isLoading: isUserLoading, logout } = useAuth();
@@ -78,6 +79,9 @@ export default function AppHeader() {
                 <Upload className="h-5 w-5" />
               </Link>
             </Button>
+            
+            <NotificationBell />
+            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-10 w-10 rounded-full ring-2 ring-transparent hover:ring-primary/30 transition-all p-0">
@@ -90,11 +94,15 @@ export default function AppHeader() {
               <DropdownMenuContent className="w-56 rounded-2xl border-border/50 bg-background/95 backdrop-blur-lg" align="end">
                 <DropdownMenuLabel className="font-heading uppercase tracking-wider text-[10px] text-muted-foreground">My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-border/50" />
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/profile/${user.username}`)}>
-                  Profile
+                <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer">
+                  <Link href={`/profile/${user.username}`}>
+                    Profile
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/settings/profile/${user.username}`)}>
-                  Settings
+                <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer">
+                  <Link href={`/settings/profile/${user.username}`}>
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/50" />
                 <DropdownMenuItem className="focus:bg-destructive/10 focus:text-destructive rounded-lg transition-colors cursor-pointer text-destructive" onClick={handleLogout}>

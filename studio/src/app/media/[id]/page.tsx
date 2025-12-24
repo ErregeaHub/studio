@@ -7,14 +7,13 @@ import { notFound, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Eye, Heart, MessageCircle, Clock, Share2 } from 'lucide-react';
+import { Eye, Heart, Clock, Share2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
+import CommentSection from '@/components/comment-section';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,32 +29,26 @@ import {
 
 export default function MediaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { user, isLoading: isUserLoading } = useAuth();
+  const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [commentText, setCommentText] = useState('');
   const [media, setMedia] = useState<any>(null);
-  const [comments, setComments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [isFollowLoading, setIsFollowLoading] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [mediaRes, commentsRes] = await Promise.all([
-          fetch(`/api/media/${id}`),
-          fetch(`/api/media/${id}/comments`)
-        ]);
-
+        const mediaRes = await fetch(`/api/media/${id}`);
+        
         if (mediaRes.status === 404) {
           setMedia(null);
         } else {
           const mediaData = await mediaRes.json();
           setMedia(mediaData);
         }
-
-        const commentsData = await commentsRes.json();
-        setComments(commentsData);
       } catch (error) {
         console.error('Failed to fetch media detail:', error);
       } finally {
@@ -65,13 +58,63 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
     fetchData();
   }, [id]);
 
-  if (isLoading) {
-    return <div className="container mx-auto max-w-6xl py-20 text-center">Loading...</div>;
-  }
+  useEffect(() => {
+    if (user && media && media.uploader_id !== user.id) {
+      checkFollowStatus();
+    }
+  }, [user, media]);
 
-  if (!media) {
-    notFound();
-  }
+  const checkFollowStatus = async () => {
+    if (!user || !media) return;
+    try {
+      const res = await fetch(`/api/users/id/${media.uploader_id}/follow?follower_id=${user.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setIsFollowing(data.isFollowing);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleFollow = async () => {
+    if (!user || !media) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to follow users.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsFollowLoading(true);
+    try {
+      const response = await fetch(`/api/users/id/${media.uploader_id}/follow`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ followerId: user.id })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsFollowing(data.isFollowing);
+        toast({
+          title: data.isFollowing ? "Followed" : "Unfollowed",
+          description: data.isFollowing 
+            ? `You are now following ${media.display_name}` 
+            : `You unfollowed ${media.display_name}`
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update follow status",
+        variant: "destructive"
+      });
+    } finally {
+      setIsFollowLoading(false);
+    }
+  };
 
   const handleLike = async () => {
     if (!user) {
@@ -105,53 +148,6 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
       title: 'Link Copied!',
       description: 'The link has been copied to your clipboard.',
     });
-  };
-
-  const handleCommentSubmit = async () => {
-    if (!user) {
-       toast({
-        variant: 'destructive',
-        title: 'Authentication Required',
-        description: 'You must be logged in to comment.',
-      });
-      return;
-    }
-    if (!commentText.trim()) {
-      toast({
-        variant: 'destructive',
-        title: 'Empty Comment',
-        description: 'You cannot post an empty comment.',
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/media/${id}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: commentText })
-      });
-      
-      if (response.ok) {
-        const newComment = await response.json();
-        setComments((prev) => [...prev, {
-          ...newComment,
-          author_name: user.display_name,
-          author_avatar: user.avatar_url
-        }]);
-        setCommentText('');
-        toast({
-          title: 'Comment Posted!',
-          description: 'Your comment has been submitted.',
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Failed to post comment.',
-      });
-    }
   };
 
   const handleDelete = async () => {
@@ -192,6 +188,14 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
       });
     }
   };
+
+  if (isLoading) {
+    return <div className="container mx-auto max-w-6xl py-20 text-center">Loading...</div>;
+  }
+
+  if (!media) {
+    notFound();
+  }
 
   const renderMedia = () => {
     if (media.type === 'video') {
@@ -262,28 +266,6 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
-                {user && media.uploader_id === user.id && (
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" size="sm" className="flex items-center gap-2 rounded-full">
-                        Delete
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your
-                          media and remove your data from our servers.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                )}
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Eye className="h-4 w-4" />
@@ -311,90 +293,23 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
                   </Link>
                   <p className="text-xs text-muted-foreground font-bold uppercase tracking-wider truncate">@{media.username}</p>
                 </div>
-                <Button variant="default" size="sm" className="rounded-full font-bold uppercase tracking-wider text-[10px] px-4" onClick={() => {
-                  toast({
-                    title: "Following",
-                    description: `You are now following ${media.display_name}.`,
-                  });
-                }}>Follow</Button>
+                {user && user.id !== media.uploader_id && (
+                  <Button 
+                    variant={isFollowing ? "secondary" : "default"} 
+                    size="sm" 
+                    className="rounded-full font-bold uppercase tracking-wider text-[10px] px-4" 
+                    onClick={handleFollow}
+                    disabled={isFollowLoading}
+                  >
+                    {isFollowing ? 'Following' : 'Follow'}
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
 
           <div className="space-y-6">
-            <h3 className="font-heading text-xl font-black uppercase tracking-tight flex items-center gap-2">
-              <MessageCircle className="h-5 w-5 text-primary" />
-              Comments <span className="text-muted-foreground">({comments?.length ?? 0})</span>
-            </h3>
-            
-            <div className="flex flex-col gap-6">
-              {isUserLoading ? (
-                 <div className="flex h-24 items-center justify-center rounded-2xl border border-dashed border-border/50 bg-secondary/10">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Loading comments...</p>
-                 </div>
-              ) : user ? (
-                <div className="flex gap-3">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.avatar_url} />
-                    <AvatarFallback className="bg-primary/10 text-primary font-bold">{user.display_name?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-3">
-                    <Textarea 
-                      placeholder="Add a comment..." 
-                      className="min-h-[100px] resize-none rounded-xl border-border/50 bg-secondary/20 focus-visible:ring-primary/20"
-                      value={commentText}
-                      onChange={(e) => setCommentText(e.target.value)}
-                    />
-                    <Button onClick={handleCommentSubmit} className="w-full rounded-full font-bold uppercase tracking-widest text-xs">Post Comment</Button>
-                  </div>
-                </div>
-              ) : (
-                 <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                       <div className="flex h-32 cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-border/50 bg-secondary/10 p-4 text-center hover:border-primary/50 transition-colors group">
-                          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground group-hover:text-primary transition-colors">You must be logged in to comment.</p>
-                          <Button variant="link" className="text-primary font-black uppercase tracking-widest text-[10px]">Log In or Sign Up</Button>
-                        </div>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-2xl border-border/50 bg-background/95 backdrop-blur-lg">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="font-heading uppercase tracking-tight font-black">Authentication Required</AlertDialogTitle>
-                        <AlertDialogDescription className="text-muted-foreground">
-                          Join the conversation! You need to be logged in to post a comment.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-full font-bold uppercase tracking-widest text-[10px]">Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => router.push('/login')} className="rounded-full font-bold uppercase tracking-widest text-[10px]">
-                          Log In
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-              )}
-              
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                {comments && comments.length > 0 ? (
-                  comments.map((comment) => (
-                    <div key={comment.id} className="flex gap-3 group">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={comment.author_avatar} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">{comment.author_name?.charAt(0) || 'U'}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 bg-secondary/10 rounded-2xl p-3 ring-1 ring-border/5 transition-all group-hover:ring-primary/10">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold">{comment.author_name}</span>
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-tighter">{formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}</span>
-                        </div>
-                        <p className="text-sm text-foreground/90 leading-relaxed">{comment.content}</p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center py-10 text-xs font-bold uppercase tracking-widest text-muted-foreground">No comments yet. Be the first!</p>
-                )}
-              </div>
-            </div>
+            <CommentSection mediaId={parseInt(id)} />
           </div>
         </div>
       </div>

@@ -99,7 +99,7 @@ export default function FeedPost({ post }: FeedPostProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           content: commentContent,
-          author_id: user.id
+          authorId: user.id
         }),
       });
       

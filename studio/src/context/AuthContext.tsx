@@ -9,6 +9,7 @@ interface User {
   email: string;
   display_name: string;
   avatar_url?: string;
+  is_verified: boolean;
 }
 
 interface AuthContextType {
@@ -27,7 +28,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    // Simulate loading user from local storage or session
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -38,22 +38,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      // Simulate API call for login
-      // In a real app, you'd make an actual API request here
-      if (email === 'test@example.com' && password === 'password') {
-        const loggedInUser: User = {
-          id: 'user_123',
-          username: 'testuser',
-          email: 'test@example.com',
-          display_name: 'Test User',
-          avatar_url: 'https://www.gravatar.com/avatar/205e460b479e2e5b48aec07710c08d50?s=200',
-        };
-        setUser(loggedInUser);
-        localStorage.setItem('user', JSON.stringify(loggedInUser));
-        router.push('/');
-      } else {
-        throw new Error('Invalid credentials');
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Login failed');
       }
+
+      const loggedInUser: User = {
+        id: result.id,
+        username: result.username,
+        email: result.email,
+        display_name: result.display_name,
+        avatar_url: result.avatar_url,
+        is_verified: result.is_verified,
+      };
+      setUser(loggedInUser);
+      localStorage.setItem('user', JSON.stringify(loggedInUser));
+      router.push('/');
     } catch (error) {
       console.error('Login failed:', error);
       throw error;

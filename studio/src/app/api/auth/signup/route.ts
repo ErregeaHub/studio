@@ -62,7 +62,7 @@ export async function POST(request: Request) {
 
     // 6. Mock Email Verification Flow
     // In a production app, you would send an email here using a service like SendGrid or AWS SES
-    console.log(`[Email Mock] Verification link for ${email}: http://localhost:9002/verify?token=${verification_token}`);
+    console.log(`[Email Mock] Verification link for ${email}: http://localhost:9002/api/auth/verify?token=${verification_token}`);
 
     // 7. Success Response
     return NextResponse.json({
