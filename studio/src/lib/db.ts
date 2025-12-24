@@ -20,14 +20,14 @@ const cleanEnv = (val: string | undefined) => {
 const poolConfig: mysql.PoolOptions = {
   host: cleanEnv(process.env.DB_HOST),
   port: parseInt(cleanEnv(process.env.DB_PORT) || '4000'), // TiDB Cloud default port is 4000
-  user: cleanEnv(process.env.DB_USER || process.env.DB_USERNAME),
+  user: cleanEnv(process.env.DB_USERNAME || process.env.DB_USER),
   password: cleanEnv(process.env.DB_PASSWORD),
   database: cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE),
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+    rejectUnauthorized: false, // TiDB Cloud often requires this for simple connections
   },
   // Session variables
   timezone: 'Z',
@@ -35,13 +35,13 @@ const poolConfig: mysql.PoolOptions = {
 };
 
 // Debug log for connection (safe version)
-console.log('Database Connection Attempt:', {
+const maskedUser = poolConfig.user ? (poolConfig.user.includes('.') ? `${poolConfig.user.split('.')[0]}.***` : 'NO_PREFIX_DETECTED') : 'undefined';
+console.log('Database Connection Info:', {
   host: poolConfig.host,
   port: poolConfig.port,
-  user: poolConfig.user ? `${poolConfig.user.split('.')[0]}.***` : 'undefined',
+  user: maskedUser,
   database: poolConfig.database,
-  ssl: !!poolConfig.ssl,
-  node_env: process.env.NODE_ENV
+  ssl: !!poolConfig.ssl
 });
 
 // Create the connection pool
@@ -67,15 +67,17 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
     return results as T;
   } catch (error: any) {
     // Check for specific TiDB prefix error to provide better guidance
-    const isPrefixError = error.message?.includes('user name prefix');
+    const msg = error.message?.toLowerCase() || '';
+    const isPrefixError = msg.includes('user name prefix') || msg.includes('prefix');
     
     console.error('Database Query Error:', {
       message: error.message,
       code: error.code,
-      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user"' : undefined
+      user: maskedUser,
+      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user". Check your DB_USERNAME env var.' : undefined
     });
     
-    throw new Error(isPrefixError ? `TiDB Error: ${error.message}` : `Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
+    throw new Error(isPrefixError ? `TiDB Configuration Error: ${error.message}` : `Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
   }
 }
 
