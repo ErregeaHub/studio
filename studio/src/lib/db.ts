@@ -13,15 +13,14 @@ dotenv.config();
 const poolConfig: mysql.PoolOptions = {
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '3306'),
-  user: process.env.DB_USER,
+  user: process.env.DB_USER || process.env.DB_USERNAME,
   password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  database: process.env.DB_NAME || process.env.DB_DATABASE,
   waitForConnections: process.env.DB_WAIT_FOR_CONNECTIONS === 'true',
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
   queueLimit: parseInt(process.env.DB_QUEUE_LIMIT || '0'),
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED === 'true',
-    // ca: process.env.DB_SSL_CA_PATH ? fs.readFileSync(process.env.DB_SSL_CA_PATH) : undefined,
+  ssl: process.env.DB_SSL === 'true' || process.env.DB_PORT === '4000' || process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false', // Default to true for security
   } : undefined,
   // Session variables
   timezone: 'Z', // UTC

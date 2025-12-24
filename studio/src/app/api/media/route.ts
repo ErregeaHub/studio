@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { MediaRepository } from '@/lib/repositories';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { put } from '@vercel/blob';
 
 export async function GET() {
   try {
@@ -29,30 +27,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'File and Uploader ID are required' }, { status: 400 });
     }
 
-    const uploadDir = join(process.cwd(), 'public', 'uploads');
-    try {
-      await mkdir(uploadDir, { recursive: true });
-    } catch (err) {
-      // Directory might already exist
-    }
-
-    // Save main file
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    // Upload main file to Vercel Blob
     const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9_.-]/g, '-');
-    const uniqueFilename = `${uuidv4()}-${sanitizedFilename}`;
-    const filePath = join(uploadDir, uniqueFilename);
-    await writeFile(filePath, buffer);
-    const media_url = `/uploads/${uniqueFilename}`;
+    const blob = await put(`uploads/${Date.now()}-${sanitizedFilename}`, file, {
+      access: 'public',
+    });
+    const media_url = blob.url;
 
     let thumbnail_url: string;
     if (thumbnailFile) {
-      const thumbBytes = await thumbnailFile.arrayBuffer();
-      const thumbBuffer = Buffer.from(thumbBytes);
-      const thumbFilename = `thumb-${uuidv4()}.jpg`;
-      const thumbPath = join(uploadDir, thumbFilename);
-      await writeFile(thumbPath, thumbBuffer);
-      thumbnail_url = `/uploads/${thumbFilename}`;
+      const thumbBlob = await put(`uploads/thumb-${Date.now()}.jpg`, thumbnailFile, {
+        access: 'public',
+      });
+      thumbnail_url = thumbBlob.url;
     } else if (type === 'video') {
       // Use a placeholder for videos if no thumbnail is provided or generated
       thumbnail_url = '/images/video-placeholder.svg';
