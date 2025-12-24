@@ -13,36 +13,44 @@ dotenv.config();
 // Helper to clean environment variables (removes quotes if present)
 const cleanEnv = (val: string | undefined) => {
   if (!val || val === 'undefined' || val === 'null') return undefined;
-  // Remove any quotes and trim
-  return val.replace(/['"]/g, '').trim();
+  // Remove any quotes (single or double) and trim whitespace
+  const cleaned = val.replace(/['"]/g, '').trim();
+  return cleaned === '' ? undefined : cleaned;
 };
 
+// Explicitly resolve the user to handle potential Vercel collisions
+const resolvedUser = cleanEnv(process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER);
+const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST);
+const resolvedPassword = cleanEnv(process.env.TIDB_PASSWORD || process.env.DB_PASSWORD);
+const resolvedDatabase = cleanEnv(process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE);
+
 const poolConfig: mysql.PoolOptions = {
-  host: cleanEnv(process.env.DB_HOST),
-  port: parseInt(cleanEnv(process.env.DB_PORT) || '4000'), // TiDB Cloud default port is 4000
-  user: cleanEnv(process.env.DB_USERNAME || process.env.DB_USER),
-  password: cleanEnv(process.env.DB_PASSWORD),
-  database: cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE),
+  host: resolvedHost,
+  port: parseInt(cleanEnv(process.env.TIDB_PORT || process.env.DB_PORT) || '4000'),
+  user: resolvedUser,
+  password: resolvedPassword,
+  database: resolvedDatabase,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: false, // TiDB Cloud often requires this for simple connections
+    rejectUnauthorized: false,
   },
-  // Session variables
   timezone: 'Z',
   charset: 'utf8mb4',
 };
 
-// Debug log for connection (safe version)
-const maskedUser = poolConfig.user ? (poolConfig.user.includes('.') ? `${poolConfig.user.split('.')[0]}.***` : 'NO_PREFIX_DETECTED') : 'undefined';
-console.log('Database Connection Info:', {
-  host: poolConfig.host,
-  port: poolConfig.port,
-  user: maskedUser,
-  database: poolConfig.database,
-  ssl: !!poolConfig.ssl
-});
+// Enhanced Debug Log (masked)
+const userStatus = resolvedUser 
+  ? (resolvedUser.includes('.') ? `PREFIX_DETECTED (${resolvedUser.split('.')[0]}.***)` : 'NO_DOT_IN_USERNAME')
+  : 'UNDEFINED';
+
+console.log('--- TiDB Connection Diagnostic ---');
+console.log('Host:', resolvedHost);
+console.log('User Status:', userStatus);
+console.log('Database:', resolvedDatabase);
+console.log('Source Priority: TIDB_USER > DB_USERNAME > DB_USER');
+console.log('----------------------------------');
 
 // Create the connection pool
 const pool = mysql.createPool(poolConfig);
@@ -73,8 +81,8 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
     console.error('Database Query Error:', {
       message: error.message,
       code: error.code,
-      user: maskedUser,
-      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user". Check your DB_USERNAME env var.' : undefined
+      userStatus: userStatus,
+      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user". Check your environment variables.' : undefined
     });
     
     throw new Error(isPrefixError ? `TiDB Configuration Error: ${error.message}` : `Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
