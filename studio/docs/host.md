@@ -11,25 +11,23 @@ This guide provides step-by-step instructions on how to deploy this Next.js appl
 
 The following environment variables need to be configured in your hosting provider's dashboard.
 
-## TiDB Cloud Integration (Vercel)
+## Database Configuration
 
-If you use the official TiDB Cloud integration on Vercel, it will automatically provide the following variables. Our application is configured to prioritize these:
+The application uses the following environment variables for database connectivity. It supports both standard `DB_*` prefixes and TiDB Cloud integration variables.
 
-*   `TIDB_HOST`: The host for your TiDB cluster.
-*   `TIDB_PORT`: Usually `4000`.
-*   `TIDB_USER`: The username (will include the required prefix).
-*   `TIDB_PASSWORD`: The password.
-*   `TIDB_DATABASE`: The database name.
-
-### Manual Configuration (Fallback)
-
-If you are not using the integration, you can use these `DB_*` variables instead:
-
-*   `DB_HOST`: Your database host.
-*   `DB_PORT`: The port your database is listening on (e.g., `4000` for TiDB).
-*   `DB_USERNAME`: The username (MUST include the prefix for TiDB Cloud).
+*   `DB_HOST`: The host for your database.
+*   `DB_PORT`: The port (default `4000` for TiDB).
+*   `DB_USERNAME`: The username (must include prefix for TiDB Cloud).
 *   `DB_PASSWORD`: The password.
 *   `DB_NAME`: The database name.
+*   `DB_SSL`: Set to `true` (default) to enable SSL, or `false` to disable.
+
+### Alternative / Fallback Variables
+
+The following variables are also supported for compatibility with various integrations:
+
+*   `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`, `DATABASE_SSL`
+*   `TIDB_HOST`, `TIDB_PORT`, `TIDB_USER`, `TIDB_PASSWORD`, `TIDB_DATABASE`
 *   `DB_WAIT_FOR_CONNECTIONS`: Set to `true` or `false` depending on your database connection pooling strategy.
 *   `DB_CONNECTION_LIMIT`: The maximum number of connections in the pool (e.g., `10`).
 *   `DB_SSL`: Set to `true` to explicitly enable SSL (recommended for TiDB Cloud).

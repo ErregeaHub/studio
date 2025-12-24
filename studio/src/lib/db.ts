@@ -18,34 +18,34 @@ const cleanEnv = (val: string | undefined) => {
   return cleaned === '' ? undefined : cleaned;
 };
 
-// Explicitly resolve connection parameters to prioritize Vercel's TiDB Integration variables
-const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST) || 'gateway01.eu-central-1.prod.aws.tidbcloud.com';
-const rawPort = cleanEnv(process.env.TIDB_PORT || process.env.DB_PORT);
-const resolvedPort = rawPort ? parseInt(rawPort) : 4000;
-const resolvedUser = cleanEnv(process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER);
-const resolvedPassword = cleanEnv(process.env.TIDB_PASSWORD || process.env.DB_PASSWORD);
-const resolvedDatabase = cleanEnv(process.env.TIDB_DATABASE || process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE) || 'test';
+// Explicitly resolve connection parameters using standard database environment variables
+const resolvedHost = cleanEnv(process.env.DB_HOST || process.env.DATABASE_HOST || process.env.TIDB_HOST);
+const resolvedPort = cleanEnv(process.env.DB_PORT || process.env.DATABASE_PORT || process.env.TIDB_PORT) || '4000';
+const resolvedUser = cleanEnv(process.env.DB_USERNAME || process.env.DB_USER || process.env.DATABASE_USERNAME || process.env.DATABASE_USER || process.env.TIDB_USER);
+const resolvedPassword = cleanEnv(process.env.DB_PASSWORD || process.env.DATABASE_PASSWORD || process.env.TIDB_PASSWORD);
+const resolvedDatabase = cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE || process.env.DATABASE_NAME || process.env.TIDB_DATABASE || process.env.TIDB_NAME);
+const useSSL = cleanEnv(process.env.DB_SSL || process.env.DATABASE_SSL) !== 'false'; // Default to true for TiDB Cloud
 
 const poolConfig: mysql.PoolOptions = {
   host: resolvedHost,
-  port: resolvedPort,
+  port: parseInt(resolvedPort),
   user: resolvedUser,
   password: resolvedPassword,
   database: resolvedDatabase,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl: {
+  ssl: useSSL ? {
     minVersion: 'TLSv1.2',
     rejectUnauthorized: false,
-  },
+  } : undefined,
   timezone: 'Z',
   charset: 'utf8mb4',
 };
 
 // Diagnostic info for identifying which env var is being used
-const userSource = process.env.TIDB_USER ? 'TIDB_USER' : (process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : 'NONE'));
-const hostSource = process.env.TIDB_HOST ? 'TIDB_HOST' : (process.env.DB_HOST ? 'DB_HOST' : 'HARDCODED_FALLBACK');
+const userSource = process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : (process.env.DATABASE_USERNAME ? 'DATABASE_USERNAME' : 'NONE'));
+const hostSource = process.env.DB_HOST ? 'DB_HOST' : (process.env.DATABASE_HOST ? 'DATABASE_HOST' : 'NONE');
 
 // Enhanced Debug Log (masked)
 const userStatus = resolvedUser 
