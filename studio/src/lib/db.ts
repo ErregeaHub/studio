@@ -19,19 +19,12 @@ const cleanEnv = (val: string | undefined) => {
 };
 
 // Explicitly resolve connection parameters to prioritize Vercel's TiDB Integration variables
-// Hardcoded fallback to your TiDB host to prevent local connection attempts
-const TIDB_FALLBACK_HOST = 'gateway01.eu-central-1.prod.aws.tidbcloud.com';
-
-const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST) || TIDB_FALLBACK_HOST;
+const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST) || 'gateway01.eu-central-1.prod.aws.tidbcloud.com';
 const rawPort = cleanEnv(process.env.TIDB_PORT || process.env.DB_PORT);
 const resolvedPort = rawPort ? parseInt(rawPort) : 4000;
 const resolvedUser = cleanEnv(process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER);
 const resolvedPassword = cleanEnv(process.env.TIDB_PASSWORD || process.env.DB_PASSWORD);
 const resolvedDatabase = cleanEnv(process.env.TIDB_DATABASE || process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE) || 'test';
-
-// Diagnostic info for identifying which env var is being used
-const userSource = process.env.TIDB_USER ? 'TIDB_USER' : (process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : 'NONE'));
-const hostSource = process.env.TIDB_HOST ? 'TIDB_HOST' : (process.env.DB_HOST ? 'DB_HOST' : 'FALLBACK');
 
 const poolConfig: mysql.PoolOptions = {
   host: resolvedHost,
@@ -49,6 +42,10 @@ const poolConfig: mysql.PoolOptions = {
   timezone: 'Z',
   charset: 'utf8mb4',
 };
+
+// Diagnostic info for identifying which env var is being used
+const userSource = process.env.TIDB_USER ? 'TIDB_USER' : (process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : 'NONE'));
+const hostSource = process.env.TIDB_HOST ? 'TIDB_HOST' : (process.env.DB_HOST ? 'DB_HOST' : 'HARDCODED_FALLBACK');
 
 // Enhanced Debug Log (masked)
 const userStatus = resolvedUser 
