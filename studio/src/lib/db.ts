@@ -49,7 +49,13 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
     const [results] = await pool.execute(sql, params);
     return results as T;
   } catch (error: any) {
-    console.error(`Database Query Error: ${error.message}`);
+    console.error('Database Query Error Detail:', {
+      message: error.message,
+      code: error.code,
+      errno: error.errno,
+      sqlState: error.sqlState,
+      host: process.env.DB_HOST
+    });
     throw new Error(`Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
   }
 }
