@@ -10,12 +10,15 @@ dotenv.config();
  * - Connection pooling with configurable parameters
  * - Session variables (character set, timezone, isolation level)
  */
+// Helper to clean environment variables (removes quotes if present)
+const cleanEnv = (val: string | undefined) => val?.replace(/['"]/g, '').trim();
+
 const poolConfig: mysql.PoolOptions = {
-  host: process.env.DB_HOST,
-  port: parseInt(process.env.DB_PORT || '3306'),
-  user: process.env.DB_USER || process.env.DB_USERNAME,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME || process.env.DB_DATABASE,
+  host: cleanEnv(process.env.DB_HOST),
+  port: parseInt(cleanEnv(process.env.DB_PORT) || '3306'),
+  user: cleanEnv(process.env.DB_USER || process.env.DB_USERNAME),
+  password: cleanEnv(process.env.DB_PASSWORD),
+  database: cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE),
   waitForConnections: process.env.DB_WAIT_FOR_CONNECTIONS === 'true',
   connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
   queueLimit: parseInt(process.env.DB_QUEUE_LIMIT || '0'),
