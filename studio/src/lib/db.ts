@@ -18,19 +18,24 @@ const cleanEnv = (val: string | undefined) => {
   return cleaned === '' ? undefined : cleaned;
 };
 
-// Explicitly resolve the user to handle potential Vercel collisions
-const rawUser = process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER;
-const resolvedUser = cleanEnv(rawUser);
-const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST);
+// Explicitly resolve connection parameters to prioritize Vercel's TiDB Integration variables
+// Hardcoded fallback to your TiDB host to prevent local connection attempts
+const TIDB_FALLBACK_HOST = 'gateway01.eu-central-1.prod.aws.tidbcloud.com';
+
+const resolvedHost = cleanEnv(process.env.TIDB_HOST || process.env.DB_HOST) || TIDB_FALLBACK_HOST;
+const rawPort = cleanEnv(process.env.TIDB_PORT || process.env.DB_PORT);
+const resolvedPort = rawPort ? parseInt(rawPort) : 4000;
+const resolvedUser = cleanEnv(process.env.TIDB_USER || process.env.DB_USERNAME || process.env.DB_USER);
 const resolvedPassword = cleanEnv(process.env.TIDB_PASSWORD || process.env.DB_PASSWORD);
-const resolvedDatabase = cleanEnv(process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE);
+const resolvedDatabase = cleanEnv(process.env.TIDB_DATABASE || process.env.TIDB_NAME || process.env.DB_NAME || process.env.DB_DATABASE) || 'test';
 
 // Diagnostic info for identifying which env var is being used
 const userSource = process.env.TIDB_USER ? 'TIDB_USER' : (process.env.DB_USERNAME ? 'DB_USERNAME' : (process.env.DB_USER ? 'DB_USER' : 'NONE'));
+const hostSource = process.env.TIDB_HOST ? 'TIDB_HOST' : (process.env.DB_HOST ? 'DB_HOST' : 'FALLBACK');
 
 const poolConfig: mysql.PoolOptions = {
   host: resolvedHost,
-  port: parseInt(cleanEnv(process.env.TIDB_PORT || process.env.DB_PORT) || '4000'),
+  port: resolvedPort,
   user: resolvedUser,
   password: resolvedPassword,
   database: resolvedDatabase,
@@ -51,11 +56,13 @@ const userStatus = resolvedUser
   : 'UNDEFINED';
 
 console.log('--- TiDB Connection Diagnostic ---');
-console.log('Host:', resolvedHost);
+console.log('Host:', resolvedHost, `(Source: ${hostSource})`);
+console.log('Port:', resolvedPort);
 console.log('User Source:', userSource);
 console.log('User Status:', userStatus);
 console.log('Database:', resolvedDatabase);
 console.log('SSL Config: minVersion=TLSv1.2, rejectUnauthorized=false');
+console.log('Environment:', process.env.NODE_ENV);
 console.log('----------------------------------');
 
 // Create the connection pool

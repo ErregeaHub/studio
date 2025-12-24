@@ -11,13 +11,25 @@ This guide provides step-by-step instructions on how to deploy this Next.js appl
 
 The following environment variables need to be configured in your hosting provider's dashboard.
 
-### Database (MySQL / TiDB Cloud)
+## TiDB Cloud Integration (Vercel)
+
+If you use the official TiDB Cloud integration on Vercel, it will automatically provide the following variables. Our application is configured to prioritize these:
+
+*   `TIDB_HOST`: The host for your TiDB cluster.
+*   `TIDB_PORT`: Usually `4000`.
+*   `TIDB_USER`: The username (will include the required prefix).
+*   `TIDB_PASSWORD`: The password.
+*   `TIDB_DATABASE`: The database name.
+
+### Manual Configuration (Fallback)
+
+If you are not using the integration, you can use these `DB_*` variables instead:
 
 *   `DB_HOST`: Your database host.
-*   `DB_PORT`: The port your database is listening on (e.g., `3306` for MySQL, `4000` for TiDB).
-*   `DB_USER`: The username for your database.
-*   `DB_PASSWORD`: The password for your database user.
-*   `DB_NAME`: The name of your database.
+*   `DB_PORT`: The port your database is listening on (e.g., `4000` for TiDB).
+*   `DB_USERNAME`: The username (MUST include the prefix for TiDB Cloud).
+*   `DB_PASSWORD`: The password.
+*   `DB_NAME`: The database name.
 *   `DB_WAIT_FOR_CONNECTIONS`: Set to `true` or `false` depending on your database connection pooling strategy.
 *   `DB_CONNECTION_LIMIT`: The maximum number of connections in the pool (e.g., `10`).
 *   `DB_SSL`: Set to `true` to explicitly enable SSL (recommended for TiDB Cloud).
