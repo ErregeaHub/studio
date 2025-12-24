@@ -18,9 +18,6 @@ async function runSignupTests() {
     email: `test_${testId}@example.com`,
     password: 'Password123!',
     display_name: 'Test Integration User',
-    first_name: 'Test',
-    last_name: 'User',
-    phone_number: '+1234567890',
   };
 
   try {
@@ -37,16 +34,14 @@ async function runSignupTests() {
       email: testData.email,
       password_hash,
       display_name: testData.display_name,
-      first_name: testData.first_name,
-      last_name: testData.last_name,
-      phone_number: testData.phone_number,
+
       verification_token
     });
 
     assert.ok(newUser.id, 'User should be created with an ID');
     assert.strictEqual(newUser.username, testData.username);
     assert.strictEqual(newUser.email, testData.email);
-    assert.strictEqual(newUser.first_name, testData.first_name);
+
     assert.strictEqual(newUser.is_verified, 0); // MySQL BOOLEAN is 0/1
     assert.ok(newUser.password_hash.startsWith('$2a$') || newUser.password_hash.startsWith('$2b$'), 'Password should be hashed');
     console.log(`✅ User created successfully: ${newUser.username}`);

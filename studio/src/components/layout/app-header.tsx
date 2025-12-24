@@ -93,7 +93,7 @@ export default function AppHeader() {
                 <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/profile/${user.username}`)}>
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer">
+                <DropdownMenuItem className="focus:bg-primary/10 focus:text-primary rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/settings/profile/${user.username}`)}>
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/50" />

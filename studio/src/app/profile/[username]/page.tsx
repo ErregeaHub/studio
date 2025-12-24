@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState, use, useCallback } from 'react';
 import { notFound } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MediaCard from '@/components/media-card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { UploadCloud } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
@@ -14,6 +17,9 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const [mediaList, setMediaList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(false);
+ 
+
+  const { user: currentUser, isLoading: isCurrentUserLoading } = useAuth();
 
   useEffect(() => {
     async function fetchProfile() {
@@ -76,6 +82,7 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </div>
         </div>
         <h1 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">{user.display_name}</h1>
+        
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">@{user.username}</span>
           <span className="h-1 w-1 rounded-full bg-muted-foreground/30"></span>

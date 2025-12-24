@@ -21,7 +21,9 @@ export default function MediaCard({ media }: MediaCardProps) {
           <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center">
             {thumbnailUrl ? (
               <Image
-                src={thumbnailUrl}
+                src={media.type === 'video' && media.thumbnailUrl === media.mediaUrl
+                  ? '/images/video-placeholder.jpg'
+                  : thumbnailUrl}
                 alt={media.title}
                 fill
                 className="object-cover transition-transform duration-300 group-hover:scale-105"

@@ -9,6 +9,43 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
+const generateVideoThumbnail = (file: File): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    video.playsInline = true;
+
+    video.onloadedmetadata = () => {
+      video.currentTime = Math.min(1, video.duration / 2);
+    };
+
+    video.onseeked = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          URL.revokeObjectURL(video.src);
+          if (blob) resolve(blob);
+          else reject(new Error('Failed to create blob from canvas'));
+        }, 'image/jpeg', 0.8);
+      } else {
+        URL.revokeObjectURL(video.src);
+        reject(new Error('Failed to get canvas context'));
+      }
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(video.src);
+      reject(new Error('Failed to load video for thumbnail generation'));
+    };
+  });
+};
+
 interface CreatePostProps {
   onPostCreated?: () => void;
 }
@@ -26,7 +63,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     const file = e.target.files?.[0];
     if (file) {
       // Validate file size (e.g., 50MB limit)
-      if (file.size > 50 * 1024 * 1024) {
+      if (file.size > 100 * 1024 * 1024) {
         toast({
           title: "File too large",
           description: "Please select a file smaller than 50MB.",
@@ -71,10 +108,22 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       formData.append('file', selectedFile);
       formData.append('title', content.split('\n')[0].substring(0, 100) || 'New Post');
       formData.append('description', content);
-      formData.append('uploader_id', user.id.toString());
+      formData.append('uploader_id', user.id);
       
       const fileType = selectedFile.type.startsWith('video') ? 'video' : 'photo';
       formData.append('type', fileType);
+
+      if (fileType === 'video') {
+        try {
+          const thumbnailBlob = await generateVideoThumbnail(selectedFile);
+          if (thumbnailBlob) {
+            formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
+          }
+        } catch (err) {
+          console.error('Failed to generate video thumbnail:', err);
+          // Continue anyway, it will fallback to a placeholder
+        }
+      }
 
       const response = await fetch('/api/media', {
         method: 'POST',
@@ -113,9 +162,9 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     <Card className="border-none bg-background rounded-none border-b border-border/50 p-4 md:p-6 transition-all duration-300">
       <div className="flex gap-3 md:gap-4">
         <Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0 ring-2 ring-background shadow-sm">
-          <AvatarImage src={user.avatar_url || ''} />
+          <AvatarImage src={user?.avatar_url || ''} />
           <AvatarFallback className="bg-primary/10 text-primary font-bold uppercase font-action text-xs md:text-sm">
-            {user.display_name?.substring(0, 2) || user.username.substring(0, 2)}
+            {user?.display_name?.substring(0, 2) || user?.username?.substring(0, 2)}
           </AvatarFallback>
         </Avatar>
         

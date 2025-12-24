@@ -9,9 +9,6 @@ export interface User {
   email: string;
   password_hash: string;
   display_name: string;
-  first_name?: string;
-  last_name?: string;
-  phone_number?: string;
   avatar_url?: string;
   bio?: string;
   is_verified: boolean;
@@ -25,16 +22,13 @@ export class UserRepository extends BaseRepository<User> {
 
   async create(data: Omit<UserInput, 'password'> & { password_hash: string; verification_token?: string }): Promise<User> {
     const result = await query<ResultSetHeader>(
-      `INSERT INTO ${this.tableName} (username, email, password_hash, display_name, first_name, last_name, phone_number, avatar_url, bio, verification_token) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO ${this.tableName} (username, email, password_hash, display_name, avatar_url, bio, verification_token) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [
         data.username,
         data.email,
         data.password_hash,
         data.display_name,
-        data.first_name ?? null,
-        data.last_name ?? null,
-        data.phone_number ?? null,
         data.avatar_url ?? null,
         data.bio ?? null,
         data.verification_token ?? null

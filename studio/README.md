@@ -35,8 +35,8 @@ Before you begin, ensure you have the following installed on your system:
     Create a `.env` file in the root directory and add your MySQL credentials:
     ```env
     DB_HOST=localhost
-    DB_USER=your_username
-    DB_PASSWORD=your_password
+    DB_USER=root
+    DB_PASSWORD=
     DB_NAME=media
     ```
 

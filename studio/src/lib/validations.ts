@@ -9,9 +9,7 @@ export const UserSchema = z.object({
   email: z.string().email('Invalid email address').max(255),
   password: z.string().min(8, 'Password must be at least 8 characters').regex(/[A-Z]/, 'Password must contain at least one uppercase letter').regex(/[0-9]/, 'Password must contain at least one number'),
   display_name: z.string().min(1, 'Display name is required').max(255),
-  first_name: z.string().max(255).optional().nullable(),
-  last_name: z.string().max(255).optional().nullable(),
-  phone_number: z.string().max(20).optional().nullable(),
+
   avatar_url: z.string().url('Invalid URL').max(255).optional().nullable(),
   bio: z.string().max(1000).optional().nullable(),
 });

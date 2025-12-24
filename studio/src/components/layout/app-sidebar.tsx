@@ -7,16 +7,16 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useSidebar } from '@/components/ui/sidebar';
 
-export default function AppSidebar({ className }: { className?: string }) {
+export default function AppSidebar() {
+  const { state, toggleSidebar } = useSidebar();
   const { user } = useAuth();
-  const { state } = useSidebar();
+
   const isCollapsed = state === "collapsed";
 
   return (
     <aside className={cn(
       "hidden flex-shrink-0 flex-col border-r bg-background p-4 md:flex transition-all duration-300",
-      isCollapsed ? "w-20" : "w-64",
-      className
+      isCollapsed ? "w-20" : "w-64"
     )}>
       <Link href="/" className={cn("mb-10 flex items-center gap-3 px-2", isCollapsed && "justify-center px-0")}>
         <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
@@ -42,7 +42,7 @@ export default function AppSidebar({ className }: { className?: string }) {
           </Link>
         </Button>
         <Button variant="ghost" className={cn("h-12 justify-start gap-4 rounded-xl px-4 text-base font-semibold transition-all hover:bg-primary/10 hover:text-primary", isCollapsed && "justify-center px-0")} asChild title="Profile">
-          <Link href={user ? `/profile/${user.username}` : '/login'}>
+          <Link href={user?.username ? `/profile/${user.username}` : '/login'}>
             <User className="h-5 w-5 flex-shrink-0" />
             {!isCollapsed && "Profile"}
           </Link>

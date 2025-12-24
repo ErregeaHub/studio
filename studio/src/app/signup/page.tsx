@@ -36,9 +36,7 @@ export default function SignupPage() {
       password: '',
       confirmPassword: '',
       display_name: '',
-      first_name: '',
-      last_name: '',
-      phone_number: '',
+
       terms: false,
     },
   });
@@ -129,32 +127,6 @@ export default function SignupPage() {
                   <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary px-1">Personal Details</h3>
                   <FormField
                     control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">First Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John" {...field} className="h-11 rounded-xl border-border/50 bg-background focus-visible:ring-primary/20" />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-bold" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="last_name"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Last Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Doe" {...field} className="h-11 rounded-xl border-border/50 bg-background focus-visible:ring-primary/20" />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-bold" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
                     name="display_name"
                     render={({ field }) => (
                       <FormItem className="space-y-1">
@@ -195,19 +167,6 @@ export default function SignupPage() {
                         <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Email Address</FormLabel>
                         <FormControl>
                           <Input placeholder="name@example.com" {...field} className="h-11 rounded-xl border-border/50 bg-background focus-visible:ring-primary/20" />
-                        </FormControl>
-                        <FormMessage className="text-[10px] uppercase font-bold" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone_number"
-                    render={({ field }) => (
-                      <FormItem className="space-y-1">
-                        <FormLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-1">Phone (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="+1234567890" {...field} className="h-11 rounded-xl border-border/50 bg-background focus-visible:ring-primary/20" />
                         </FormControl>
                         <FormMessage className="text-[10px] uppercase font-bold" />
                       </FormItem>

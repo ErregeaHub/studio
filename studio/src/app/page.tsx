@@ -7,11 +7,11 @@ import CreatePost from '@/components/feed/create-post';
 import { useAuth } from '@/context/AuthContext';
 import { Globe } from 'lucide-react';
 
-export default function HomePage() {
+export default function Home() {
   const [sort, setSort] = useState('newest');
   const [mediaList, setMediaList] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   const fetchMedia = async () => {
     setIsLoading(true);
@@ -20,6 +20,7 @@ export default function HomePage() {
       const data = await response.json();
       if (Array.isArray(data)) {
         setMediaList(data);
+        console.log('Fetched media list:', data);
       }
     } catch (error) {
       console.error('Failed to fetch media:', error);

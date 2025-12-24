@@ -7,11 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "npx.cmd tsx src/scripts/migrate.ts",
-    "seed": "npx.cmd tsx src/scripts/seed.ts",
-    "test:db": "npx.cmd tsx src/tests/db.test.ts",
-    "verify-db": "npx.cmd tsx src/scripts/verify-db.ts",
-    "typecheck": "tsc --noEmit"
+    "migrate": "tsx src/scripts/migrate.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "test:db": "tsx src/tests/db.test.ts",
+    "verify-db": "tsx src/scripts/verify-db.ts",
+    "typecheck": "tsc --noEmit",
+    "log-media-count": "ts-node src/scripts/log-media-count.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",

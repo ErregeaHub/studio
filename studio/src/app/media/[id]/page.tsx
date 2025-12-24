@@ -14,6 +14,7 @@ import { Eye, Heart, MessageCircle, Clock, Share2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -153,6 +154,45 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
     }
   };
 
+  const handleDelete = async () => {
+    if (!user) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "You need to be logged in to delete content.",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/media/${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        toast({
+          title: 'Success!',
+          description: 'Media deleted successfully.',
+        });
+        router.push(`/profile/${user.username}`); // Redirect to user's profile after deletion
+      } else {
+        const errorData = await response.json();
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: errorData.error || 'Failed to delete media.',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to delete media:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete media.',
+      });
+    }
+  };
+
   const renderMedia = () => {
     if (media.type === 'video') {
       return (
@@ -200,6 +240,50 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
                   <Share2 className="h-5 w-5" />
                   <span className="font-bold">Share</span>
                 </Button>
+                {user && media.uploader_id === user.id && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="flex items-center gap-2 rounded-full">
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your
+                          media and remove your data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+                {user && media.uploader_id === user.id && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" size="sm" className="flex items-center gap-2 rounded-full">
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your
+                          media and remove your data from our servers.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Eye className="h-4 w-4" />

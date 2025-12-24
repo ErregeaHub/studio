@@ -4,34 +4,35 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/context/AuthContext';
 import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { login, isLoading: isAuthLoading } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+
     try {
       await login(email, password);
       toast({
-        title: "Success",
-        description: "You have successfully logged in.",
+        title: 'Login Successful',
+        description: 'You have been successfully logged in.',
       });
       router.push('/');
-    } catch (error) {
+    } catch (err: any) {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to login. Please try again.",
+        title: 'Login Failed',
+        description: err.message || 'An unexpected error occurred.',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);

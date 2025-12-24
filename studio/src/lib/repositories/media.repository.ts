@@ -92,6 +92,11 @@ export class MediaRepository extends BaseRepository<MediaContent> {
     return results.length > 0 ? results[0] : null;
   }
 
+  async count(): Promise<number> {
+    const results = await query<{ count: number }[]>(`SELECT COUNT(*) as count FROM ${this.tableName}`);
+    return results[0].count;
+  }
+
   async incrementViews(id: number): Promise<void> {
     await query(`UPDATE ${this.tableName} SET views_count = views_count + 1 WHERE id = ?`, [id]);
   }
@@ -102,5 +107,13 @@ export class MediaRepository extends BaseRepository<MediaContent> {
 
   async decrementLikes(id: number): Promise<void> {
     await query(`UPDATE ${this.tableName} SET likes_count = GREATEST(0, CAST(likes_count AS SIGNED) - 1) WHERE id = ?`, [id]);
+  }
+
+  async deleteMedia(id: string, uploaderId: string): Promise<boolean> {
+    const result = await query<ResultSetHeader>(
+      `DELETE FROM ${this.tableName} WHERE id = ? AND uploader_id = ?`,
+      [id, uploaderId]
+    );
+    return result.affectedRows > 0;
   }
 }

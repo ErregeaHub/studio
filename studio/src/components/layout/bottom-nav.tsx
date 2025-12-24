@@ -3,9 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Clapperboard, PlusSquare, Search, User } from 'lucide-react';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
-import Image from 'next/image';
 
 export default function BottomNav() {
   const pathname = usePathname();
@@ -19,7 +19,7 @@ export default function BottomNav() {
     { 
       icon: User, 
       label: 'Profile', 
-      href: user ? `/profile/${user.username}` : '/login' 
+      href: user ? `/profile/${user?.username}` : '/login' 
     },
   ];
 

@@ -2,9 +2,7 @@
 -- Version: 1.1.0
 -- Description: Updated schema with categories removed. Users can post text, videos or photos.
 
--- Create Database
-CREATE DATABASE IF NOT EXISTS media;
-USE media;
+
 
 -- 1. Users Table
 -- Stores user account information and profiles.
@@ -12,9 +10,15 @@ CREATE TABLE IF NOT EXISTS user_accounts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
     display_name VARCHAR(255) NOT NULL,
+    first_name VARCHAR(255),
+    last_name VARCHAR(255),
+    phone_number VARCHAR(20),
     avatar_url VARCHAR(255),
     bio TEXT,
+    is_verified TINYINT(1) NOT NULL DEFAULT 0,
+    verification_token VARCHAR(255),
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_username (username),

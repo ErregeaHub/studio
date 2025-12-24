@@ -24,15 +24,12 @@ export async function POST(request: Request) {
       );
     }
 
-    let { username, email, password, display_name, first_name, last_name, phone_number } = validatedData.data;
+    let { username, email, password, display_name } = validatedData.data;
 
     // Simple sanitization
     username = username.trim().toLowerCase();
     email = email.trim().toLowerCase();
     display_name = display_name.trim();
-    first_name = first_name?.trim() || null;
-    last_name = last_name?.trim() || null;
-    phone_number = phone_number?.trim() || null;
 
     const userRepo = new UserRepository();
 
@@ -60,9 +57,6 @@ export async function POST(request: Request) {
       email,
       password_hash,
       display_name,
-      first_name,
-      last_name,
-      phone_number,
       verification_token
     });
 

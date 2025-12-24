@@ -39,13 +39,13 @@ export async function POST(request: Request) {
     // Save main file
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const uniqueFilename = `${uuidv4()}-${file.name.replace(/\s+/g, '-')}`;
+    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9_.-]/g, '-');
+    const uniqueFilename = `${uuidv4()}-${sanitizedFilename}`;
     const filePath = join(uploadDir, uniqueFilename);
     await writeFile(filePath, buffer);
     const media_url = `/uploads/${uniqueFilename}`;
 
-    // Save thumbnail if provided, otherwise use main file (for photos)
-    let thumbnail_url = media_url;
+    let thumbnail_url: string;
     if (thumbnailFile) {
       const thumbBytes = await thumbnailFile.arrayBuffer();
       const thumbBuffer = Buffer.from(thumbBytes);
@@ -53,6 +53,11 @@ export async function POST(request: Request) {
       const thumbPath = join(uploadDir, thumbFilename);
       await writeFile(thumbPath, thumbBuffer);
       thumbnail_url = `/uploads/${thumbFilename}`;
+    } else if (type === 'video') {
+      // Use a placeholder for videos if no thumbnail is provided or generated
+      thumbnail_url = '/images/video-placeholder.svg';
+    } else {
+      thumbnail_url = media_url;
     }
 
     const mediaRepo = new MediaRepository();
