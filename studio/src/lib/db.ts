@@ -11,24 +11,38 @@ dotenv.config();
  * - Session variables (character set, timezone, isolation level)
  */
 // Helper to clean environment variables (removes quotes if present)
-const cleanEnv = (val: string | undefined) => val?.replace(/['"]/g, '').trim();
+const cleanEnv = (val: string | undefined) => {
+  if (!val || val === 'undefined' || val === 'null') return undefined;
+  // Remove any quotes and trim
+  return val.replace(/['"]/g, '').trim();
+};
 
 const poolConfig: mysql.PoolOptions = {
   host: cleanEnv(process.env.DB_HOST),
-  port: parseInt(cleanEnv(process.env.DB_PORT) || '3306'),
+  port: parseInt(cleanEnv(process.env.DB_PORT) || '4000'), // TiDB Cloud default port is 4000
   user: cleanEnv(process.env.DB_USER || process.env.DB_USERNAME),
   password: cleanEnv(process.env.DB_PASSWORD),
   database: cleanEnv(process.env.DB_NAME || process.env.DB_DATABASE),
-  waitForConnections: process.env.DB_WAIT_FOR_CONNECTIONS === 'true',
-  connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT || '10'),
-  queueLimit: parseInt(process.env.DB_QUEUE_LIMIT || '0'),
-  ssl: process.env.DB_SSL === 'true' || process.env.DB_PORT === '4000' || process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false', // Default to true for security
-  } : undefined,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  ssl: {
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+  },
   // Session variables
-  timezone: 'Z', // UTC
+  timezone: 'Z',
   charset: 'utf8mb4',
 };
+
+// Debug log for connection (safe version)
+console.log('Database Connection Attempt:', {
+  host: poolConfig.host,
+  port: poolConfig.port,
+  user: poolConfig.user ? `${poolConfig.user.split('.')[0]}.***` : 'undefined',
+  database: poolConfig.database,
+  ssl: !!poolConfig.ssl,
+  node_env: process.env.NODE_ENV
+});
 
 // Create the connection pool
 const pool = mysql.createPool(poolConfig);
@@ -52,14 +66,16 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
     const [results] = await pool.execute(sql, params);
     return results as T;
   } catch (error: any) {
-    console.error('Database Query Error Detail:', {
+    // Check for specific TiDB prefix error to provide better guidance
+    const isPrefixError = error.message?.includes('user name prefix');
+    
+    console.error('Database Query Error:', {
       message: error.message,
       code: error.code,
-      errno: error.errno,
-      sqlState: error.sqlState,
-      host: process.env.DB_HOST
+      hint: isPrefixError ? 'TiDB Cloud requires the username to be in the format "prefix.user"' : undefined
     });
-    throw new Error(`Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
+    
+    throw new Error(isPrefixError ? `TiDB Error: ${error.message}` : `Database operation failed: ${error.code || 'UNKNOWN_ERROR'}`);
   }
 }
 
