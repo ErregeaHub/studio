@@ -1,0 +1,76 @@
+{
+  "placeholderImages": [
+    {
+      "id": "1",
+      "description": "Misty mountains at dawn",
+      "imageUrl": "https://images.unsplash.com/photo-1508108712903-49b7ef9b1df8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtaXN0eSUyMG1vdW50YWluc3xlbnwwfHx8fDE3NjYzNjI1MjV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "misty mountains"
+    },
+    {
+      "id": "2",
+      "description": "City skyline at night with light trails",
+      "imageUrl": "https://images.unsplash.com/photo-1529619768328-e37af76c6fe5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxjaXR5JTIwbmlnaHR8ZW58MHx8fHwxNzY2MjY5NzIyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "city night"
+    },
+    {
+      "id": "3",
+      "description": "Close up of ocean waves on a beach",
+      "imageUrl": "https://images.unsplash.com/photo-1525088505678-9c0e4653fdfe?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxvY2VhbiUyMHdhdmVzfGVufDB8fHx8MTc2NjM3NTMwNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ocean waves"
+    },
+    {
+      "id": "4",
+      "description": "Portrait of a woman looking at her reflection",
+      "imageUrl": "https://images.unsplash.com/photo-1730564524559-d04018b7a221?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMHJlZmxlY3Rpb258ZW58MHx8fHwxNzY2MzEzMjg5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman reflection"
+    },
+    {
+      "id": "5",
+      "description": "A path through a dense green forest",
+      "imageUrl": "https://images.unsplash.com/photo-1507139722691-cc2c94e3a2b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxmb3Jlc3QlMjBwYXRofGVufDB8fHx8MTc2NjI5MDI3MXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "forest path"
+    },
+    {
+      "id": "6",
+      "description": "Time-lapse of a flower blooming",
+      "imageUrl": "https://images.unsplash.com/photo-1444021465936-c6ca81d39b84?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxmbG93ZXIlMjBibG9vbXxlbnwwfHx8fDE3NjYzNTAxNDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flower bloom"
+    },
+    {
+      "id": "7",
+      "description": "Geometric patterns of modern architecture",
+      "imageUrl": "https://images.unsplash.com/photo-1531591022136-eb8b0da1e6d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtb2Rlcm4lMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzY2MjkzNTY3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern architecture"
+    },
+    {
+      "id": "8",
+      "description": "A man smiling candidly on a city street",
+      "imageUrl": "https://images.unsplash.com/photo-1534614971-6be99a7a3ffd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bWFuJTIwc21pbGluZ3xlbnwwfHx8fDE3NjYzMzQ0MTZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man smiling"
+    },
+    {
+      "id": "9",
+      "description": "Sand dunes in the desert at sunset",
+      "imageUrl": "https://images.unsplash.com/photo-1498144668414-48bf526766cf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxkZXNlcnQlMjBkdW5lc3xlbnwwfHx8fDE3NjYzNDE4MjN8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "desert dunes"
+    },
+    {
+      "id": "10",
+      "description": "Abstract colorful shapes in an animation",
+      "imageUrl": "https://images.unsplash.com/photo-1750727688838-063053458397?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxhYnN0cmFjdCUyMGFuaW1hdGlvbnxlbnwwfHx8fDE3NjYzNzUzMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract animation"
+    },
+    {
+      "id": "11",
+      "description": "A winding road along a dramatic coastline",
+      "imageUrl": "https://images.unsplash.com/photo-1494233892892-84542a694e72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb2FzdGFsJTIwcm9hZHxlbnwwfHx8fDE3NjYzNDEzODR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coastal road"
+    },
+    {
+      "id": "12",
+      "description": "A macro photograph of ink dropping in water",
+      "imageUrl": "https://images.unsplash.com/photo-1664982739380-0362a007eebc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxpbmslMjB3YXRlcnxlbnwwfHx8fDE3NjYzNzUzMDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ink water"
+    }
+  ]
+}
