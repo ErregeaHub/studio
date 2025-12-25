@@ -13,33 +13,24 @@ The following environment variables need to be configured in your hosting provid
 
 ## Database Configuration
 
-The application uses the following environment variables for database connectivity. It supports both standard `DB_*` prefixes and TiDB Cloud integration variables.
+The application uses PostgreSQL (via Supabase or other providers). It supports several environment variable prefixes and connection strings:
 
-*   `DB_HOST`: The host for your database.
-*   `DB_PORT`: The port (default `4000` for TiDB).
-*   `DB_USERNAME`: The username (must include prefix for TiDB Cloud).
-*   `DB_PASSWORD`: The password.
-*   `DB_NAME`: The database name.
-*   `DB_SSL`: Set to `true` (default) to enable SSL, or `false` to disable.
+*   `POSTGRES_URL`: The full connection string (recommended for Supabase/Vercel).
+*   `DATABASE_URL`: Alternative full connection string.
+*   `SUPABASE_HOST`, `SUPABASE_PORT`, `SUPABASE_USER`, `SUPABASE_PASSWORD`, `SUPABASE_DATABASE`
+*   `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DATABASE`
+*   `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`
+*   `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`
 
-### Alternative / Fallback Variables
-
-The following variables are also supported for compatibility with various integrations:
-
-*   `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`, `DATABASE_SSL`
-*   `TIDB_HOST`, `TIDB_PORT`, `TIDB_USER`, `TIDB_PASSWORD`, `TIDB_DATABASE`
-*   `DB_WAIT_FOR_CONNECTIONS`: Set to `true` or `false` depending on your database connection pooling strategy.
-*   `DB_CONNECTION_LIMIT`: The maximum number of connections in the pool (e.g., `10`).
-*   `DB_SSL`: Set to `true` to explicitly enable SSL (recommended for TiDB Cloud).
-*   `DB_SSL_REJECT_UNAUTHORIZED`: Set to `true` or `false` for SSL certificate validation. Defaults to `true` if not specified.
+*   `DATABASE_SSL`: Set to `true` (default) to enable SSL, or `false` to disable. Supabase requires SSL.
 
 ### Cloud Storage (Vercel Blob)
 
 *   `BLOB_READ_WRITE_TOKEN`: Your Vercel Blob read/write token. This is automatically generated when you create a Blob store in the Vercel dashboard.
 
-## TiDB Cloud Integration
+## Supabase Integration
 
-Since TiDB is MySQL-compatible, the application uses the `mysql2/promise` library. Ensure you enable SSL by setting `DB_SSL=true` in your environment variables for a secure connection to TiDB Cloud.
+The application is configured to work with Supabase PostgreSQL. Ensure you enable SSL by setting `DATABASE_SSL=true` in your environment variables for a secure connection. You can use either the direct connection parameters or the pooled connection parameters provided by Supabase.
 
 ## Vercel Blob Integration
 

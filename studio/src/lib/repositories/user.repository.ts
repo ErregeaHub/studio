@@ -1,7 +1,6 @@
 import { BaseRepository } from './base.repository';
 import { query } from '../db';
 import { UserInput, UserSchema } from '../validations';
-import { ResultSetHeader } from 'mysql2';
 
 export interface User {
   id: number;
@@ -21,9 +20,9 @@ export class UserRepository extends BaseRepository<User> {
   protected tableName = 'user_accounts';
 
   async create(data: Omit<UserInput, 'password'> & { password_hash: string; verification_token?: string }): Promise<User> {
-    const result = await query<ResultSetHeader>(
+    const results = await query<User[]>(
       `INSERT INTO ${this.tableName} (username, email, password_hash, display_name, avatar_url, bio, verification_token) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *`,
       [
         data.username,
         data.email,
@@ -35,9 +34,8 @@ export class UserRepository extends BaseRepository<User> {
       ]
     );
 
-    const newUser = await this.findById(result.insertId);
-    if (!newUser) throw new Error('Failed to create user');
-    return newUser;
+    if (results.length === 0) throw new Error('Failed to create user');
+    return results[0];
   }
 
   async findByUsername(username: string): Promise<User | null> {
@@ -71,11 +69,11 @@ export class UserRepository extends BaseRepository<User> {
     const setClause = fields.map(field => `${field} = ?`).join(', ');
     const values = Object.values(data);
 
-    await query<ResultSetHeader>(
-      `UPDATE ${this.tableName} SET ${setClause} WHERE id = ?`,
+    const results = await query<User[]>(
+      `UPDATE ${this.tableName} SET ${setClause} WHERE id = ? RETURNING *`,
       [...values, id]
     );
 
-    return this.findById(id);
+    return results.length > 0 ? results[0] : null;
   }
 }

@@ -1,7 +1,6 @@
 import { BaseRepository } from './base.repository';
 import { query } from '../db';
 import { MediaContentInput, MediaContentSchema } from '../validations';
-import { ResultSetHeader } from 'mysql2';
 
 export interface MediaContent {
   id: number;
@@ -23,10 +22,10 @@ export class MediaRepository extends BaseRepository<MediaContent> {
   async create(data: MediaContentInput): Promise<MediaContent> {
     const validatedData = MediaContentSchema.parse(data);
     
-    const result = await query<ResultSetHeader>(
+    const results = await query<MediaContent[]>(
       `INSERT INTO ${this.tableName} 
        (uploader_id, type, title, description, media_url, thumbnail_url) 
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?) RETURNING *`,
       [
         validatedData.uploader_id,
         validatedData.type,
@@ -37,9 +36,8 @@ export class MediaRepository extends BaseRepository<MediaContent> {
       ]
     );
 
-    const newMedia = await this.findById(result.insertId);
-    if (!newMedia) throw new Error('Failed to create media content');
-    return newMedia;
+    if (results.length === 0) throw new Error('Failed to create media content');
+    return results[0];
   }
 
   async findByUploader(uploaderId: number): Promise<MediaContent[]> {
@@ -93,8 +91,8 @@ export class MediaRepository extends BaseRepository<MediaContent> {
   }
 
   async count(): Promise<number> {
-    const results = await query<{ count: number }[]>(`SELECT COUNT(*) as count FROM ${this.tableName}`);
-    return results[0].count;
+    const results = await query<{ count: string }[]>(`SELECT COUNT(*) as count FROM ${this.tableName}`);
+    return parseInt(results[0].count);
   }
 
   async incrementViews(id: number): Promise<void> {

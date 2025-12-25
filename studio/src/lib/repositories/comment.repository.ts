@@ -1,7 +1,6 @@
 import { BaseRepository } from './base.repository';
 import { query } from '../db';
 import { CommentInput, CommentSchema } from '../validations';
-import { ResultSetHeader } from 'mysql2';
 
 export interface Comment {
   id: number;
@@ -28,14 +27,20 @@ export class CommentRepository extends BaseRepository<Comment> {
   async create(data: CommentInput): Promise<any> {
     const validatedData = CommentSchema.parse(data);
     
-    const result = await query<ResultSetHeader>(
-      `INSERT INTO ${this.tableName} (media_id, author_id, content) VALUES (?, ?, ?)`,
+    const results = await query<any[]>(
+      `WITH inserted AS (
+         INSERT INTO ${this.tableName} (media_id, author_id, content) 
+         VALUES (?, ?, ?) 
+         RETURNING *
+       )
+       SELECT i.*, u.display_name as author_name, u.avatar_url as author_avatar 
+       FROM inserted i
+       JOIN user_accounts u ON i.author_id = u.id`,
       [validatedData.media_id, validatedData.author_id, validatedData.content]
     );
 
-    const newComment = await this.findByIdWithDetails(result.insertId);
-    if (!newComment) throw new Error('Failed to create comment');
-    return newComment;
+    if (results.length === 0) throw new Error('Failed to create comment');
+    return results[0];
   }
 
   async findByMedia(mediaId: number): Promise<Comment[]> {

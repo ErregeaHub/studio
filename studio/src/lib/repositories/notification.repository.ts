@@ -15,14 +15,14 @@ export class NotificationRepository extends BaseRepository<Notification> {
   protected tableName = 'notifications';
 
   async create(data: Omit<Notification, 'id' | 'created_at' | 'is_read'>): Promise<Notification> {
-    const result = await query<any>(
-      `INSERT INTO ${this.tableName} (recipient_id, actor_id, type, reference_id) VALUES (?, ?, ?, ?)`,
+    const results = await query<Notification[]>(
+      `INSERT INTO ${this.tableName} (recipient_id, actor_id, type, reference_id) 
+       VALUES (?, ?, ?, ?) RETURNING *`,
       [data.recipient_id, data.actor_id, data.type, data.reference_id || null]
     );
     
-    const newNotification = await this.findById(result.insertId);
-    if (!newNotification) throw new Error('Failed to create notification');
-    return newNotification;
+    if (results.length === 0) throw new Error('Failed to create notification');
+    return results[0];
   }
 
   async findByRecipient(recipientId: number): Promise<any[]> {
@@ -38,23 +38,23 @@ export class NotificationRepository extends BaseRepository<Notification> {
 
   async markAsRead(id: number): Promise<void> {
     await query(
-      `UPDATE ${this.tableName} SET is_read = 1 WHERE id = ?`,
+      `UPDATE ${this.tableName} SET is_read = TRUE WHERE id = ?`,
       [id]
     );
   }
 
   async markAllAsRead(recipientId: number): Promise<void> {
     await query(
-      `UPDATE ${this.tableName} SET is_read = 1 WHERE recipient_id = ?`,
+      `UPDATE ${this.tableName} SET is_read = TRUE WHERE recipient_id = ?`,
       [recipientId]
     );
   }
 
   async getUnreadCount(recipientId: number): Promise<number> {
-    const results = await query<{ count: number }[]>(
-      `SELECT COUNT(*) as count FROM ${this.tableName} WHERE recipient_id = ? AND is_read = 0`,
+    const results = await query<{ count: string }[]>(
+      `SELECT COUNT(*) as count FROM ${this.tableName} WHERE recipient_id = ? AND is_read = FALSE`,
       [recipientId]
     );
-    return results[0].count;
+    return parseInt(results[0].count);
   }
 }

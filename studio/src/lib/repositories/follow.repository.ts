@@ -12,7 +12,9 @@ export class FollowRepository extends BaseRepository<Follow> {
 
   async follow(followerId: number, followingId: number): Promise<void> {
     await query(
-      `INSERT IGNORE INTO ${this.tableName} (follower_id, following_id) VALUES (?, ?)`,
+      `INSERT INTO ${this.tableName} (follower_id, following_id) 
+       VALUES (?, ?) 
+       ON CONFLICT (follower_id, following_id) DO NOTHING`,
       [followerId, followingId]
     );
   }
@@ -33,19 +35,19 @@ export class FollowRepository extends BaseRepository<Follow> {
   }
 
   async getFollowersCount(userId: number): Promise<number> {
-    const results = await query<{ count: number }[]>(
+    const results = await query<{ count: string }[]>(
       `SELECT COUNT(*) as count FROM ${this.tableName} WHERE following_id = ?`,
       [userId]
     );
-    return results[0].count;
+    return parseInt(results[0].count);
   }
 
   async getFollowingCount(userId: number): Promise<number> {
-    const results = await query<{ count: number }[]>(
+    const results = await query<{ count: string }[]>(
       `SELECT COUNT(*) as count FROM ${this.tableName} WHERE follower_id = ?`,
       [userId]
     );
-    return results[0].count;
+    return parseInt(results[0].count);
   }
 
   async getFollowers(userId: number): Promise<any[]> {

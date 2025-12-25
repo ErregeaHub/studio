@@ -1,5 +1,4 @@
 import { query } from '../db';
-import { ResultSetHeader } from 'mysql2';
 
 /**
  * Base Repository providing common CRUD utility methods
@@ -20,10 +19,10 @@ export abstract class BaseRepository<T> {
   }
 
   async delete(id: number): Promise<boolean> {
-    const result = await query<ResultSetHeader>(
+    const result = await query<{ rowCount: number }>(
       `DELETE FROM ${this.tableName} WHERE id = ?`,
       [id]
     );
-    return result.affectedRows > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
