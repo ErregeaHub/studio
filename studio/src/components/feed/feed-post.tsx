@@ -278,12 +278,12 @@ export default function FeedPost({ post }: FeedPostProps) {
 
               <button 
                 onClick={() => setShowComments(!showComments)}
-                className="group flex items-center gap-1.5 text-muted-foreground transition-colors active:text-blue-500"
+                className="group flex items-center gap-1.5 text-muted-foreground transition-colors active:text-primary"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors active:bg-blue-500/10">
-                  <MessageCircle className={cn("h-[16px] w-[16px]", showComments && "text-blue-500 fill-blue-500/10")} />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors active:bg-primary/10">
+                  <MessageCircle className={cn("h-[16px] w-[16px]", showComments && "text-primary fill-primary/10")} />
                 </div>
-                <span className={cn("text-[11px] font-medium", showComments && "text-blue-500")}>{commentsList.length}</span>
+                <span className={cn("text-[11px] font-medium", showComments && "text-primary")}>{commentsList.length}</span>
               </button>
 
               <AuthGuard action="share posts">

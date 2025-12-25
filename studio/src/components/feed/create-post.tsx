@@ -107,7 +107,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
       }
 
       formData.append('file', selectedFile);
-      formData.append('title', content.split('\n')[0].substring(0, 100) || 'New Post');
+      formData.append('title', ''); // Title is no longer used, but kept for DB compatibility
       formData.append('description', content);
       formData.append('uploader_id', user.id);
       

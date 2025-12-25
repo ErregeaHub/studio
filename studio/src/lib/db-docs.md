@@ -1,7 +1,6 @@
-# MediaFlow Database Documentation
+# RedRAW Database Documentation
 
-## 1. Overview
-The MediaFlow database is designed to support a sleek, dark-themed content platform for sharing and interacting with photos and videos. It follows a relational model using PostgreSQL (Supabase).
+The RedRAW database is designed to support a raw and powerful, dark-themed content platform for sharing and interacting with photos and videos. It follows a relational model using PostgreSQL (Supabase).
 
 ## 2. Entity Relationship Summary
 - **user_accounts**: Core entity representing registered users.

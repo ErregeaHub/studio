@@ -39,7 +39,7 @@ export default function AppHeader() {
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/50 bg-background/80 px-4 backdrop-blur-md">
       <div className="flex-1 flex items-center gap-3">
         <Link href="/" className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
+          <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
             <span className="text-primary-foreground font-black text-xl">R</span>
           </div>
           <span className="font-heading font-black text-lg tracking-tighter uppercase">RedRAW</span>

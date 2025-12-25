@@ -1,4 +1,4 @@
--- MediaFlow Database Schema Migration
+-- RedRAW Database Schema Migration
 -- Version: 1.1.0
 -- Description: Updated schema with categories removed. Users can post text, videos or photos.
 

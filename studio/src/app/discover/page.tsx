@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { Search, Loader2 } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import DiscoverMediaCard from '@/components/discover/media-card';
 
@@ -11,7 +10,6 @@ export default function DiscoverPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const fetchMedia = useCallback(async (isInitial = false) => {
@@ -70,19 +68,6 @@ export default function DiscoverPage() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Search Header - Sticky */}
-      <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm px-4 py-3 border-b border-border/50">
-        <div className="relative max-w-2xl mx-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search discover..."
-            className="w-full bg-secondary/50 border-none rounded-xl pl-10 h-10 text-sm focus-visible:ring-1 focus-visible:ring-primary/20"
-          />
-        </div>
-      </div>
-
       <div className="p-0.5">
         {isLoading ? (
           <div className="columns-2 gap-0.5 sm:columns-3 md:columns-4 lg:columns-5">

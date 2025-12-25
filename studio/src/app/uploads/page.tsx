@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { UploadCloud, X } from 'lucide-react';
@@ -18,7 +17,6 @@ export default function UploadPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   
@@ -69,8 +67,8 @@ export default function UploadPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!file || !title) {
-      toast({ variant: 'destructive', title: 'Missing Information', description: 'Please fill in all required fields and select a file.' });
+    if (!file) {
+      toast({ variant: 'destructive', title: 'Missing Information', description: 'Please select a file to upload.' });
       setIsUploading(false);
       return;
     }
@@ -88,7 +86,7 @@ export default function UploadPage() {
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('title', title);
+      formData.append('title', ''); // Title is no longer used, kept for DB compatibility
       formData.append('description', description);
       formData.append('type', type);
       formData.append('uploader_id', user.id.toString());
@@ -165,13 +163,13 @@ export default function UploadPage() {
     });
   };
   
-  const canSubmit = !isUploading && !isUserLoading && !!file && !!title && !!user;
+  const canSubmit = !isUploading && !isUserLoading && !!file && !!user;
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex flex-col gap-2">
         <h1 className="font-heading text-3xl font-black uppercase tracking-tight">Create Post</h1>
-        <p className="text-muted-foreground font-medium">Share your creativity with the MediaFlow community.</p>
+        <p className="text-muted-foreground font-medium">Share your creativity with the RedRAW community.</p>
       </div>
 
       <Card className="border-border/50 bg-secondary/10 rounded-3xl overflow-hidden shadow-none ring-1 ring-border/50">
@@ -221,17 +219,6 @@ export default function UploadPage() {
             </div>
 
             <div className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Title</label>
-                <Input
-                  placeholder="Give your post a catchy title..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="h-12 rounded-xl border-border/50 bg-background focus-visible:ring-primary/20 font-medium"
-                  required
-                />
-              </div>
-
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Description</label>
                 <Textarea

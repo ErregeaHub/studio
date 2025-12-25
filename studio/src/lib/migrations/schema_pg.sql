@@ -1,4 +1,4 @@
--- MediaFlow Database Schema Migration (PostgreSQL)
+-- RedRAW Database Schema Migration (PostgreSQL)
 -- Version: 1.1.0
 -- Description: Updated schema for PostgreSQL with categories removed.
 

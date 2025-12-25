@@ -16,14 +16,18 @@ This project is built with a modern, performant, and type-safe technology stack:
 
 | Category          | Technology       | Description                                      |
 | :---------------- | :--------------- | :----------------------------------------------- |
-| **Framework**     | Next.js 15       | React framework for production                   |
+| **Framework**     | Next.js 15       | React framework with Turbopack & App Router      |
+| **Language**      | TypeScript       | Static typing for predictable and robust code    |
 | **Database**      | PostgreSQL       | Hosted on Supabase with Repository Pattern       |
 | **Email**         | Resend           | Official Resend SDK for transactional emails     |
 | **Storage**       | Vercel Blob      | Efficient cloud storage for media assets         |
 | **Validation**    | Zod              | Schema declaration and validation library        |
+| **Forms**         | React Hook Form  | Flexible and extensible forms with validation    |
 | **Styling**       | Tailwind CSS     | Utility-first CSS framework                      |
-| **Components**    | shadcn/ui        | Reusable UI components                           |
+| **Components**    | shadcn/ui        | Accessible components built on Radix UI          |
 | **Icons**         | Lucide React     | Beautiful and customizable open-source icons     |
+| **Security**      | bcryptjs         | Secure password hashing and storage              |
+| **Monitoring**    | Speed Insights   | Vercel's real-time performance monitoring        |
 
 ## Key Features
 

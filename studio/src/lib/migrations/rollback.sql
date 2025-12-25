@@ -1,4 +1,4 @@
--- MediaFlow Database Schema Rollback
+-- RedRAW Database Schema Rollback
 -- Version: 1.0.0
 -- Description: Reverts the initial schema setup.
 

@@ -111,12 +111,12 @@ export default function SignupPage() {
       <Card className="w-full max-w-2xl border-border/50 bg-secondary/10 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-border/50">
         <CardHeader className="space-y-4 pb-8 pt-10 text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-primary shadow-lg shadow-primary/20">
-            <span className="text-2xl font-black text-white">M</span>
+            <span className="text-2xl font-black text-primary-foreground">R</span>
           </div>
           <div className="space-y-1">
             <CardTitle className="font-heading text-3xl font-black uppercase tracking-tight">Create Account</CardTitle>
             <CardDescription className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Join the MediaFlow community today
+              Join the RedRAW community today
             </CardDescription>
           </div>
         </CardHeader>
@@ -232,7 +232,7 @@ export default function SignupPage() {
 
               <Button type="submit" className="w-full h-12 rounded-full font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isLoading ? 'Creating Account...' : 'Join MediaFlow'}
+                {isLoading ? 'Creating Account...' : 'Join RedRAW'}
               </Button>
 
               <div className="text-center">

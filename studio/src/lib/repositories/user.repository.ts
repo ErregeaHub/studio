@@ -76,4 +76,14 @@ export class UserRepository extends BaseRepository<User> {
 
     return results.length > 0 ? results[0] : null;
   }
+
+  async search(searchTerm: string): Promise<User[]> {
+    const term = `%${searchTerm}%`;
+    return await query<User[]>(
+      `SELECT * FROM ${this.tableName} 
+       WHERE username LIKE ? OR display_name LIKE ? 
+       ORDER BY username ASC`,
+      [term, term]
+    );
+  }
 }

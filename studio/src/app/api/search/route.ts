@@ -1,21 +1,43 @@
 import { NextResponse } from 'next/server';
-import { MediaRepository } from '@/lib/repositories';
+import { UserRepository, MediaRepository } from '@/lib/repositories';
 
 export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const q = searchParams.get('q');
+
+  if (!q) {
+    return NextResponse.json([]);
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const query = searchParams.get('q');
-
-    if (!query) {
-      return NextResponse.json([]);
-    }
-
+    const userRepo = new UserRepository();
     const mediaRepo = new MediaRepository();
-    const results = await mediaRepo.searchWithDetails(query);
+
+    const [users, posts] = await Promise.all([
+      userRepo.search(q),
+      mediaRepo.searchWithDetails(q)
+    ]);
+
+    // Combine and format results
+    const results = [
+      ...users.map(u => ({
+        type: 'user',
+        id: u.id,
+        username: u.username,
+        display_name: u.display_name,
+        avatar_url: u.avatar_url,
+        bio: u.bio
+      })),
+      ...posts.map(p => ({
+        type: 'post',
+        ...p,
+        content: p.description || p.title || ''
+      }))
+    ];
 
     return NextResponse.json(results);
-  } catch (error: any) {
-    console.error('API Error (Search):', error);
-    return NextResponse.json({ error: 'Failed to perform search' }, { status: 500 });
+  } catch (error) {
+    console.error('Search API error:', error);
+    return NextResponse.json({ error: 'Search failed' }, { status: 500 });
   }
 }

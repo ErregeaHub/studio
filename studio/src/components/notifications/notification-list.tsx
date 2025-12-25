@@ -64,8 +64,8 @@ export default function NotificationList() {
 
   const getIcon = (type: string) => {
     switch (type) {
-      case 'like': return <Heart className="h-3 w-3 fill-red-500 text-red-500" />;
-      case 'comment': return <MessageCircle className="h-3 w-3 fill-blue-500 text-blue-500" />;
+      case 'like': return <Heart className="h-3 w-3 fill-primary text-primary" />;
+      case 'comment': return <MessageCircle className="h-3 w-3 fill-primary text-primary" />;
       case 'follow': return <UserPlus className="h-3 w-3 fill-green-500 text-green-500" />;
       default: return <Bell className="h-3 w-3" />;
     }

@@ -30,7 +30,7 @@ export type SignupInput = z.infer<typeof SignupSchema>;
 export const MediaContentSchema = z.object({
   uploader_id: z.number().positive(),
   type: z.enum(['photo', 'video']),
-  title: z.string().min(1).max(255),
+  title: z.string().max(255).optional().nullable().or(z.literal('')),
   description: z.string().max(2000).optional().nullable(),
   media_url: z.string().max(255),
   thumbnail_url: z.string().max(255),
