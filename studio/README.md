@@ -1,6 +1,6 @@
-# MediaFlow
+# RedRAW
 
-MediaFlow is a sleek, dark-themed content sharing platform designed for an engaging user experience. It allows users to upload, share, and discover photos and videos, sorted by popularity.
+RedRAW is a raw and powerful, dark-themed content sharing platform designed for an engaging user experience. It allows users to upload, share, and discover photos and videos, sorted by popularity.
 
 ## Table of Contents
 
@@ -17,46 +17,52 @@ This project is built with a modern, performant, and type-safe technology stack:
 | Category          | Technology       | Description                                      |
 | :---------------- | :--------------- | :----------------------------------------------- |
 | **Framework**     | Next.js 15       | React framework for production                   |
-| **Database**      | MySQL            | Relational database with `mysql2` and Repository Pattern |
+| **Database**      | PostgreSQL       | Hosted on Supabase with Repository Pattern       |
+| **Email**         | Resend           | Official Resend SDK for transactional emails     |
+| **Storage**       | Vercel Blob      | Efficient cloud storage for media assets         |
 | **Validation**    | Zod              | Schema declaration and validation library        |
 | **Styling**       | Tailwind CSS     | Utility-first CSS framework                      |
 | **Components**    | shadcn/ui        | Reusable UI components                           |
 | **Icons**         | Lucide React     | Beautiful and customizable open-source icons     |
-| **State Management** | React Context API | Centralized authentication state management      |
 
 ## Key Features
 
 -   **Dynamic Feed**: Explore media sorted by newest, popularity, or views.
--   **Media Upload**: Support for both photos and videos.
+-   **Media Upload**: Support for both photos and videos via Vercel Blob.
 -   **Interactive Detail Pages**: Like media, view counts, and post comments.
 -   **User Profiles**: Dedicated pages for creators to showcase their uploads.
 -   **Global Search**: Quickly find media by title or description.
--   **Authentication**: Centralized auth state for personalized interactions.
+-   **Email Verification**: Secure signup flow with Resend verification links.
+-   **Notifications**: Real-time feedback for likes, comments, and follows.
 
 ## Quick Start
 
-Get MediaFlow up and running in a few simple steps:
+Get RedRAW up and running in a few simple steps:
 
 1.  **Prerequisites**:
     *   Node.js (v18 or later)
-    *   MySQL server (local or accessible via network)
+    *   Supabase PostgreSQL instance
+    *   Resend API Key
 
 2.  **Environment Setup**:
-    *   Create a `.env` file in the root with your MySQL credentials:
+    *   Create a `.env` file in the root with your credentials:
         ```env
-        DB_HOST=localhost
-        DB_USER=root
-        DB_PASSWORD=
-        DB_NAME=media
+        # Database (PostgreSQL/Supabase)
+        POSTGRES_URL=your_supabase_connection_string
+        
+        # Email (Resend)
+        RESEND_API_KEY=your_resend_api_key
+        EMAIL_FROM="RedRAW <onboarding@resend.dev>"
+        
+        # App URL
+        NEXT_PUBLIC_APP_URL="http://localhost:9002"
+        
+        # Storage (Vercel Blob)
+        BLOB_READ_WRITE_TOKEN=your_blob_token
         ```
     *   Install dependencies:
         ```bash
         npm install
-        ```
-    *   Initialize the database:
-        ```bash
-        npm run migrate
-        npm run seed
         ```
 
 3.  **Run Development Server**:

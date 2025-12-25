@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState, use, useCallback } from 'react';
-import { notFound } from 'next/navigation';
+import { notFound, useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import MediaCard from '@/components/media-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, UserPlus, UserCheck } from 'lucide-react';
+import { UploadCloud, UserPlus, UserCheck, Settings } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 export default function ProfilePage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = use(params);
@@ -23,8 +24,16 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
   const { toast } = useToast();
+  const { checkAuth } = useAuthGuard();
+  const router = useRouter();
 
   const { user: currentUser, isLoading: isCurrentUserLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isCurrentUserLoading && !currentUser) {
+      checkAuth('view profiles');
+    }
+  }, [currentUser, isCurrentUserLoading, checkAuth]);
 
   const fetchStats = useCallback(async (userId: number) => {
     try {
@@ -134,21 +143,38 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
   const photos = mediaList.filter(m => m.type === 'photo');
   const videos = mediaList.filter(m => m.type === 'video');
 
+  const isOwnProfile = currentUser && currentUser.id === user?.id;
+  const profileAvatar = isOwnProfile ? (currentUser.avatar_url || user.avatar_url) : user.avatar_url;
+  const profileName = isOwnProfile ? currentUser.display_name : user.display_name;
+
   return (
-    <div className="container mx-auto max-w-5xl px-4 py-10 md:py-16">
+    <div className="container mx-auto max-w-5xl px-4 py-10 relative">
+      {currentUser && currentUser.id === user.id && (
+        <div className="absolute top-4 right-4 z-10">
+          <Button 
+            onClick={() => router.push('/settings')}
+            variant="ghost"
+            size="icon"
+            className="h-11 w-11 rounded-full bg-background/50 backdrop-blur shadow-sm border border-border/50 active:scale-90 transition-all"
+          >
+            <Settings className="h-6 w-6" />
+          </Button>
+        </div>
+      )}
+
       <div className="flex flex-col items-center text-center mb-16">
         <div className="relative mb-6">
-          <Avatar className="h-28 w-28 md:h-40 md:w-40 ring-4 ring-primary/10 shadow-2xl">
-            <AvatarImage src={user.avatar_url || '/avatars/default.png'} alt={user.display_name} className="object-cover" />
-            <AvatarFallback className="bg-primary/5 text-primary text-3xl font-bold">{user.display_name?.charAt(0)}</AvatarFallback>
+          <Avatar className="h-28 w-28 ring-4 ring-primary/10 shadow-2xl">
+            <AvatarImage src={profileAvatar || '/avatars/default.png'} alt={profileName} className="object-cover" />
+            <AvatarFallback className="bg-primary/5 text-primary text-3xl font-bold">{profileName?.charAt(0)}</AvatarFallback>
           </Avatar>
-          <div className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full shadow-lg border-4 border-background md:p-3">
-             <div className="h-4 w-4 md:h-5 md:w-5 flex items-center justify-center">
+          <div className="absolute -bottom-2 -right-2 bg-primary text-white p-2 rounded-full shadow-lg border-4 border-background">
+             <div className="h-4 w-4 flex items-center justify-center">
                 <span className="text-[10px] font-black uppercase">Pro</span>
              </div>
           </div>
         </div>
-        <h1 className="font-heading text-3xl md:text-5xl font-black uppercase tracking-tight mb-2">{user.display_name}</h1>
+        <h1 className="font-heading text-3xl font-black uppercase tracking-tight mb-2">{profileName}</h1>
         
         <div className="flex items-center gap-3 mb-4">
           <span className="text-xs font-bold uppercase tracking-widest text-primary">@{user.username}</span>
@@ -167,6 +193,14 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </div>
         </div>
 
+        {user.bio && (
+          <p className="max-w-md text-sm text-muted-foreground mb-8 leading-relaxed">
+            {user.bio}
+          </p>
+        )}
+
+        {currentUser && currentUser.id === user.id && null /* Removed from here */}
+
         {currentUser && currentUser.id !== user.id && (
           <Button 
             onClick={handleFollow}
@@ -184,12 +218,6 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
             )}
           </Button>
         )}
-
-        {user.bio && (
-          <p className="max-w-xl text-sm md:text-base text-muted-foreground leading-relaxed font-medium">
-            {user.bio}
-          </p>
-        )}
       </div>
 
       <Tabs defaultValue="all" className="w-full">
@@ -201,13 +229,13 @@ export default function ProfilePage({ params }: { params: Promise<{ username: st
           </TabsList>
         </div>
 
-        <TabsContent value="all">
+        <TabsContent value="all" className="mt-0">
           <MediaGrid mediaList={mediaList} />
         </TabsContent>
-        <TabsContent value="photos">
+        <TabsContent value="photos" className="mt-0">
           <MediaGrid mediaList={photos} />
         </TabsContent>
-        <TabsContent value="videos">
+        <TabsContent value="videos" className="mt-0">
           <MediaGrid mediaList={videos} />
         </TabsContent>
       </Tabs>
@@ -225,7 +253,7 @@ function MediaGrid({ mediaList }: { mediaList: any[] }) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4">
       {mediaList.map((mediaItem) => (
         <MediaCard key={mediaItem.id} media={{
           ...mediaItem,

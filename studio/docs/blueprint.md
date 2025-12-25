@@ -44,7 +44,7 @@
 - `PUT /api/users/update/:id` in `src/app/settings/profile/[username]/page.tsx:81`.
 - `POST /api/auth/signup` in `src/app/signup/page.tsx:44`.
 - `POST /api/auth/login` in `src/context/AuthContext.tsx:40`.
-- `GET /api/auth/verify?token=...` used during signup flow (server logs) — `src/app/api/auth/signup/route.ts:63`.
+- `GET /api/auth/verify?token=...` in `src/app/verify/page.tsx:21`.
 - `GET /api/notifications?userId=...` in `src/components/notifications/notification-bell.tsx:16` and `src/components/notifications/notification-list.tsx:33`.
 - `PUT /api/notifications/:id/read` in `src/components/notifications/notification-list.tsx:50`.
 
@@ -63,12 +63,14 @@
 
 - File: `.env` at project root.
 - Keys:
-  - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
-  - `DB_WAIT_FOR_CONNECTIONS`, `DB_CONNECTION_LIMIT`, `DB_QUEUE_LIMIT`
-  - `DB_SSL_REJECT_UNAUTHORIZED`, `NODE_ENV`
+  - `POSTGRES_URL`, `DATABASE_URL` (PostgreSQL connection strings)
+  - `RESEND_API_KEY` (Resend email SDK)
+  - `EMAIL_FROM` (Sender email identity)
+  - `NEXT_PUBLIC_APP_URL` (Frontend URL for links)
+  - `BLOB_READ_WRITE_TOKEN` (Vercel Blob storage)
 - Loader: `dotenv` in `src/lib/db.ts:1`.
-- Usage: Database pool configured from `.env`; no API base URL env variables are used. All client calls use relative paths (`/api/...`).
+- Usage: Database pool configured from `.env`; Resend SDK for emails.
 - Setup:
-  - Create `.env` and set DB credentials.
-  - Ensure MySQL is reachable; default development uses `port=8889` in this repo.
+  - Create `.env` and set PostgreSQL/Resend credentials.
+  - Database timeouts are tuned for remote Supabase connections (15s timeout).
 

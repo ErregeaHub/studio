@@ -4,6 +4,7 @@ import { SignupSchema } from '@/lib/validations';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 import { isRateLimited } from '@/lib/rate-limit';
+import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(request: Request) {
   try {
@@ -60,9 +61,8 @@ export async function POST(request: Request) {
       verification_token
     });
 
-    // 6. Mock Email Verification Flow
-    // In a production app, you would send an email here using a service like SendGrid or AWS SES
-    console.log(`[Email Mock] Verification link for ${email}: http://localhost:9002/api/auth/verify?token=${verification_token}`);
+    // 6. Send Verification Email
+    await sendVerificationEmail(email, verification_token);
 
     // 7. Success Response
     return NextResponse.json({

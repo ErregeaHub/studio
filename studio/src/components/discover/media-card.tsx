@@ -33,8 +33,8 @@ export default function DiscoverMediaCard({ media }: DiscoverMediaCardProps) {
         src={media.thumbnailUrl || '/placeholder-media.jpg'}
         alt={media.title}
         fill
-        className="object-cover transition-opacity duration-300 group-hover:opacity-90"
-        sizes="(max-width: 768px) 33vw, (max-width: 1200px) 25vw, 20vw"
+        className="object-cover transition-opacity duration-300 active:opacity-80"
+        sizes="33vw"
       />
 
       {/* Content Indicator Icon (Top Right) */}

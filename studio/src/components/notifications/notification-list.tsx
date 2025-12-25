@@ -107,7 +107,7 @@ export default function NotificationList() {
   }
 
   return (
-    <ScrollArea className="h-[400px] w-full md:w-[380px] p-2">
+    <ScrollArea className="h-[400px] w-full p-2">
       <div className="flex flex-col gap-2">
         {notifications.map((notification) => (
           <div 
@@ -115,8 +115,8 @@ export default function NotificationList() {
             className={cn(
               "relative flex items-start gap-3 p-3 rounded-xl transition-all duration-200 group",
               notification.is_read 
-                ? "bg-transparent hover:bg-secondary/20" 
-                : "bg-primary/5 border border-primary/10 hover:border-primary/20"
+                ? "bg-transparent active:bg-secondary/20" 
+                : "bg-primary/5 border border-primary/10 active:border-primary/20"
             )}
           >
             <Link href={`/profile/${notification.actor_name}`} className="relative flex-shrink-0">
@@ -136,7 +136,7 @@ export default function NotificationList() {
                 onClick={() => !notification.is_read && markAsRead(notification.id)}
               >
                 <div className="text-sm leading-snug">
-                  <span className="font-bold hover:text-primary transition-colors">{notification.actor_name}</span>
+                  <span className="font-bold active:text-primary transition-colors">{notification.actor_name}</span>
                   <span className="text-muted-foreground ml-1">{getMessage(notification)}</span>
                 </div>
                 <p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider mt-1 font-medium">
@@ -149,7 +149,7 @@ export default function NotificationList() {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="h-6 w-6 rounded-full hover:bg-primary/10 hover:text-primary shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-6 w-6 rounded-full active:bg-primary/10 active:text-primary shrink-0 opacity-100 transition-opacity"
                 onClick={() => markAsRead(notification.id)}
                 title="Mark as read"
               >
@@ -158,7 +158,7 @@ export default function NotificationList() {
             )}
             
             {!notification.is_read && (
-               <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary animate-pulse group-hover:hidden" />
+               <div className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary animate-pulse active:hidden" />
             )}
           </div>
         ))}

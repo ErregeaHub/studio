@@ -38,14 +38,14 @@ export default function NotificationBell() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
+        <Button variant="ghost" size="icon" className="relative rounded-full active:bg-primary/10 active:text-primary transition-colors">
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-background animate-pulse" />
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 md:w-96 p-0 rounded-2xl border-border/50 bg-background/95 backdrop-blur-lg shadow-xl" align="end">
+      <PopoverContent className="w-80 p-0 rounded-2xl border-border/50 bg-background/95 backdrop-blur-lg shadow-xl" align="end">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
           <h4 className="font-heading font-black text-sm uppercase tracking-wider">Notifications</h4>
           {unreadCount > 0 && (

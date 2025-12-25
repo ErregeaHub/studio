@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatDistanceToNow } from 'date-fns';
 import { Send, MessageCircle } from 'lucide-react';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 interface Comment {
   id: number;
@@ -106,11 +107,11 @@ export default function CommentSection({ mediaId }: CommentSectionProps) {
         )}
       </ScrollArea>
 
-      {user ? (
+      <AuthGuard action="post comments" mode="dialog">
         <form onSubmit={handleSubmit} className="flex gap-2 items-end">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.avatar_url || ''} />
-            <AvatarFallback>{user.display_name?.substring(0, 2)}</AvatarFallback>
+            <AvatarImage src={user?.avatar_url || ''} />
+            <AvatarFallback>{user?.display_name?.substring(0, 2) || '??'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 relative">
             <Textarea
@@ -135,11 +136,7 @@ export default function CommentSection({ mediaId }: CommentSectionProps) {
             </Button>
           </div>
         </form>
-      ) : (
-        <div className="p-4 bg-secondary/20 rounded-lg text-center text-sm text-muted-foreground">
-          Please log in to comment.
-        </div>
-      )}
+      </AuthGuard>
     </div>
   );
 }

@@ -68,6 +68,8 @@ export default function SignupPage() {
         title: 'Registration Successful!',
         description: 'Please check your email to verify your account.',
       });
+      // Store email for resend functionality
+      localStorage.setItem('pending_verification_email', data.email);
       router.push('/verify-email');
     } catch (error: any) {
       toast({

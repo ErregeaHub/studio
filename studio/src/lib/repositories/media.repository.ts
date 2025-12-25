@@ -96,22 +96,34 @@ export class MediaRepository extends BaseRepository<MediaContent> {
   }
 
   async incrementViews(id: number): Promise<void> {
-    await query(`UPDATE ${this.tableName} SET views_count = views_count + 1 WHERE id = ?`, [id]);
+    await query(`UPDATE ${this.tableName} SET views_count = COALESCE(views_count, 0) + 1 WHERE id = ?`, [id]);
+  }
+
+  async findFollowingFeed(userId: number): Promise<any[]> {
+    return await query<any[]>(
+      `SELECT m.*, u.username, u.display_name, u.avatar_url
+       FROM ${this.tableName} m
+       JOIN user_accounts u ON m.uploader_id = u.id
+       JOIN follows f ON f.following_id = u.id
+       WHERE f.follower_id = ?
+       ORDER BY m.created_at DESC`,
+      [userId]
+    );
   }
 
   async incrementLikes(id: number): Promise<void> {
-    await query(`UPDATE ${this.tableName} SET likes_count = likes_count + 1 WHERE id = ?`, [id]);
+    await query(`UPDATE ${this.tableName} SET likes_count = COALESCE(likes_count, 0) + 1 WHERE id = ?`, [id]);
   }
 
   async decrementLikes(id: number): Promise<void> {
-    await query(`UPDATE ${this.tableName} SET likes_count = GREATEST(0, CAST(likes_count AS SIGNED) - 1) WHERE id = ?`, [id]);
+    await query(`UPDATE ${this.tableName} SET likes_count = GREATEST(0, COALESCE(likes_count, 0) - 1) WHERE id = ?`, [id]);
   }
 
-  async deleteMedia(id: string, uploaderId: string): Promise<boolean> {
-    const result = await query<ResultSetHeader>(
+  async deleteMedia(id: number, uploaderId: number): Promise<boolean> {
+    const result = await query<any>(
       `DELETE FROM ${this.tableName} WHERE id = ? AND uploader_id = ?`,
       [id, uploaderId]
     );
-    return result.affectedRows > 0;
+    return (result.rowCount || 0) > 0;
   }
 }

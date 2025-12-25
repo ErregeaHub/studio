@@ -10,10 +10,11 @@ import { useEffect, useState, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
-
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 
 export default function UploadPage() {
   const { user, isLoading: isUserLoading } = useAuth();
+  const { checkAuth } = useAuthGuard();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -27,14 +28,9 @@ export default function UploadPage() {
 
   useEffect(() => {
     if (!isUserLoading && !user) {
-      toast({
-        variant: 'destructive',
-        title: 'Authentication Required',
-        description: 'You need to be logged in to upload media.',
-      });
-      router.push('/login');
+      checkAuth('upload media');
     }
-  }, [user, isUserLoading, router, toast]);
+  }, [user, isUserLoading, checkAuth]);
   
   useEffect(() => {
     return () => {
@@ -172,14 +168,14 @@ export default function UploadPage() {
   const canSubmit = !isUploading && !isUserLoading && !!file && !!title && !!user;
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8 md:py-12">
+    <div className="container mx-auto max-w-3xl px-4 py-8">
       <div className="mb-8 flex flex-col gap-2">
-        <h1 className="font-heading text-3xl md:text-4xl font-black uppercase tracking-tight">Create Post</h1>
+        <h1 className="font-heading text-3xl font-black uppercase tracking-tight">Create Post</h1>
         <p className="text-muted-foreground font-medium">Share your creativity with the MediaFlow community.</p>
       </div>
 
       <Card className="border-border/50 bg-secondary/10 rounded-3xl overflow-hidden shadow-none ring-1 ring-border/50">
-        <CardContent className="p-6 md:p-8">
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-8">
             <div className="space-y-4">
               <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Media File</label>

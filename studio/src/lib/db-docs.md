@@ -1,7 +1,7 @@
 # MediaFlow Database Documentation
 
 ## 1. Overview
-The MediaFlow database is designed to support a sleek, dark-themed content platform for sharing and interacting with photos and videos. It follows a relational model using MySQL 8.0+.
+The MediaFlow database is designed to support a sleek, dark-themed content platform for sharing and interacting with photos and videos. It follows a relational model using PostgreSQL (Supabase).
 
 ## 2. Entity Relationship Summary
 - **user_accounts**: Core entity representing registered users.
@@ -65,13 +65,13 @@ The application uses a Repository pattern with Zod validation for robust databas
 
 ### 6.1 Core Connection
 - **Path:** `src/lib/db.ts`
-- **Features:** Connection pooling (`mysql2/promise`), SSL support, and automatic session variable configuration (UTC timezone, utf8mb4).
+- **Features:** Connection pooling (`pg`), SSL support, and automatic session variable configuration.
 - **Transaction Support:** Provided via the `withTransaction` wrapper.
 
 ### 6.2 Data Validation
 - **Path:** `src/lib/validations.ts`
 - **Tool:** Zod
-- **Ensures:** Data types, lengths, and formats match MySQL schema constraints before execution.
+- **Ensures:** Data types, lengths, and formats match PostgreSQL schema constraints before execution.
 
 ### 6.3 Repositories
 Located in `src/lib/repositories/`, these classes handle all CRUD operations:

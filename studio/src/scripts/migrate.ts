@@ -19,32 +19,36 @@ async function runMigration() {
     .map(s => s.trim())
     .filter(s => s.length > 0);
 
-  const connection = await pool.getConnection();
+  const client = await pool.connect();
 
   try {
-    await connection.beginTransaction();
+    await client.query('BEGIN');
 
     console.log(`Executing ${statements.length} SQL statements...`);
 
     for (const statement of statements) {
-      await connection.execute(statement);
+      // Convert ? to $n for each statement if needed
+      let pgSql = statement;
+      // Note: Our migration script statements usually don't have params, 
+      // but we should be careful with any logic that might.
+      await client.query(pgSql);
     }
 
     // Log the migration
-    await connection.execute(
-      `INSERT INTO schema_migrations (version, description) VALUES (?, ?) 
-       ON DUPLICATE KEY UPDATE applied_at = CURRENT_TIMESTAMP`,
+    await client.query(
+      `INSERT INTO schema_migrations (version, description) VALUES ($1, $2) 
+       ON CONFLICT (version) DO UPDATE SET applied_at = CURRENT_TIMESTAMP`,
       ['1.0.0', 'Initial schema setup']
     );
 
-    await connection.commit();
+    await client.query('COMMIT');
     console.log('--- Migration Completed Successfully ---');
   } catch (error: any) {
-    await connection.rollback();
+    await client.query('ROLLBACK');
     console.error(`--- Migration Failed! ---\nError: ${error.message}`);
     process.exit(1);
   } finally {
-    connection.release();
+    client.release();
     await pool.end();
   }
 }

@@ -14,14 +14,20 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const { user, isLoading: isAuthLoading } = useAuth();
 
-  const fetchMedia = async () => {
+  const fetchMedia = async (currentSort?: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/media');
+      const sortValue = currentSort || sort;
+      let url = '/api/media';
+      
+      if (sortValue === 'following' && user) {
+        url = `/api/media?following=true&userId=${user.id}`;
+      }
+      
+      const response = await fetch(url);
       const data = await response.json();
       if (Array.isArray(data)) {
         setMediaList(data);
-        console.log('Fetched media list:', data);
       }
     } catch (error) {
       console.error('Failed to fetch media:', error);
@@ -31,10 +37,19 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchMedia();
-  }, []);
+    if (!isAuthLoading) {
+      fetchMedia();
+    }
+  }, [isAuthLoading, user?.id]);
   
+  const handleSortChange = (value: string) => {
+    setSort(value);
+    fetchMedia(value);
+  };
+
   const sortedMedia = [...mediaList].sort((a, b) => {
+    if (sort === 'following') return 0; // Already sorted by date in SQL
+    
     switch (sort) {
       case 'popular':
         return b.likes_count - a.likes_count;
@@ -53,7 +68,7 @@ export default function Home() {
         <div className="px-4 py-3">
           <h1 className="text-xl font-black uppercase tracking-tight font-heading text-foreground">Home Feed</h1>
         </div>
-        <Tabs defaultValue="newest" onValueChange={setSort} className="w-full">
+        <Tabs defaultValue="newest" onValueChange={handleSortChange} className="w-full">
           <TabsList className="h-12 w-full justify-start rounded-none border-none bg-transparent p-0">
             <TabsTrigger 
               value="newest" 
@@ -61,12 +76,14 @@ export default function Home() {
             >
               For You
             </TabsTrigger>
-            <TabsTrigger 
-              value="popular" 
-              className="flex-1 rounded-none border-b-2 border-transparent px-8 text-[10px] font-black uppercase tracking-[0.2em] font-action data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-muted-foreground/60 transition-all duration-300"
-            >
-              Trending
-            </TabsTrigger>
+            {user && (
+              <TabsTrigger 
+                value="following" 
+                className="flex-1 rounded-none border-b-2 border-transparent px-8 text-[10px] font-black uppercase tracking-[0.2em] font-action data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:text-primary text-muted-foreground/60 transition-all duration-300"
+              >
+                Following
+              </TabsTrigger>
+            )}
           </TabsList>
         </Tabs>
       </div>

@@ -9,6 +9,7 @@ interface User {
   email: string;
   display_name: string;
   avatar_url?: string;
+  bio?: string;
   is_verified: boolean;
 }
 
@@ -56,6 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: result.email,
         display_name: result.display_name,
         avatar_url: result.avatar_url,
+        bio: result.bio,
         is_verified: result.is_verified,
       };
       setUser(loggedInUser);

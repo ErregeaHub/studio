@@ -17,6 +17,9 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid ID' }, { status: 400 });
     }
 
+    // In a real app, you would also track which user liked which post in the media_likes table
+    // and potentially create a notification for the uploader.
+    
     if (action === 'unlike') {
       await mediaRepo.decrementLikes(id);
     } else {
@@ -26,6 +29,9 @@ export async function POST(
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error('API Error (Like Media):', error);
-    return NextResponse.json({ error: 'Failed to toggle like' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Failed to toggle like',
+      message: error.message 
+    }, { status: 500 });
   }
 }

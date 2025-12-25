@@ -15,10 +15,10 @@ export default function MediaCard({ media }: MediaCardProps) {
   const imageHint = media.imageHint || `${media.type} titled ${media.title}`;
 
   return (
-    <Link href={`/media/${media.id}`} className="group block">
-      <Card className="overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/20">
+    <Link href={`/media/${media.id}`} className="group block active:scale-[0.98] transition-transform duration-200">
+      <Card className="overflow-hidden border-none shadow-none bg-secondary/10">
         <CardContent className="p-0">
-          <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center">
+          <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center rounded-xl">
             {thumbnailUrl ? (
               <Image
                 src={media.type === 'video' && media.thumbnailUrl === media.mediaUrl
@@ -26,7 +26,7 @@ export default function MediaCard({ media }: MediaCardProps) {
                   : thumbnailUrl}
                 alt={media.title}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover"
                 data-ai-hint={imageHint}
               />
             ) : (
@@ -41,7 +41,7 @@ export default function MediaCard({ media }: MediaCardProps) {
                 </span>
               </div>
             )}
-            <Badge variant="secondary" className="absolute right-2 top-2 z-10">
+            <Badge variant="secondary" className="absolute right-2 top-2 z-10 bg-background/80 backdrop-blur-sm border-none">
               {media.type === 'video' ? (
                 <Clapperboard className="mr-1 h-3 w-3" />
               ) : (
@@ -52,21 +52,21 @@ export default function MediaCard({ media }: MediaCardProps) {
           </div>
         </CardContent>
         <CardFooter className="flex items-start gap-4 p-4">
-          <Avatar className="h-10 w-10 border-2 border-transparent group-hover:border-accent">
+          <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
             <AvatarImage src={media.user.avatar} alt={media.user.name} />
             <AvatarFallback>{media.user.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="font-headline font-semibold leading-tight group-hover:text-accent truncate">{media.title}</p>
+            <p className="font-headline font-semibold leading-tight truncate text-base">{media.title}</p>
             <p className="text-sm text-muted-foreground truncate">{media.user.name}</p>
-            <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Heart className="h-3 w-3" />
-                <span>{media.likes?.toLocaleString() || 0}</span>
+            <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 bg-secondary/20 px-2 py-1 rounded-full">
+                <Heart className="h-3.5 w-3.5" />
+                <span className="font-medium">{media.likes?.toLocaleString() || 0}</span>
               </div>
-              <div className="flex items-center gap-1">
-                <Eye className="h-3 w-3" />
-                <span>{media.views?.toLocaleString() || 0}</span>
+              <div className="flex items-center gap-1.5 bg-secondary/20 px-2 py-1 rounded-full">
+                <Eye className="h-3.5 w-3.5" />
+                <span className="font-medium">{media.views?.toLocaleString() || 0}</span>
               </div>
             </div>
           </div>

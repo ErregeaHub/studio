@@ -1,6 +1,6 @@
 # Deployment Guide
 
-This guide provides step-by-step instructions on how to deploy this Next.js application to Vercel or Netlify.
+This guide provides step-by-step instructions on how to deploy **RedRAW** to Vercel or Netlify.
 
 ## General Settings
 
@@ -11,22 +11,26 @@ This guide provides step-by-step instructions on how to deploy this Next.js appl
 
 The following environment variables need to be configured in your hosting provider's dashboard.
 
-## Database Configuration
+### Database Configuration (PostgreSQL)
 
-The application uses PostgreSQL (via Supabase or other providers). It supports several environment variable prefixes and connection strings:
+The application uses PostgreSQL (optimized for Supabase). It supports several environment variable prefixes:
 
 *   `POSTGRES_URL`: The full connection string (recommended for Supabase/Vercel).
 *   `DATABASE_URL`: Alternative full connection string.
-*   `SUPABASE_HOST`, `SUPABASE_PORT`, `SUPABASE_USER`, `SUPABASE_PASSWORD`, `SUPABASE_DATABASE`
-*   `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DATABASE`
-*   `DATABASE_HOST`, `DATABASE_PORT`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `DATABASE_NAME`
-*   `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_NAME`
+*   `DATABASE_SSL`: Set to `true` (default) to enable SSL. Supabase requires SSL.
 
-*   `DATABASE_SSL`: Set to `true` (default) to enable SSL, or `false` to disable. Supabase requires SSL.
+### Email Configuration (Resend)
+
+*   `RESEND_API_KEY`: Your Resend API key for sending verification emails.
+*   `EMAIL_FROM`: The sender identity (e.g., `RedRAW <onboarding@resend.dev>`).
 
 ### Cloud Storage (Vercel Blob)
 
-*   `BLOB_READ_WRITE_TOKEN`: Your Vercel Blob read/write token. This is automatically generated when you create a Blob store in the Vercel dashboard.
+*   `BLOB_READ_WRITE_TOKEN`: Your Vercel Blob read/write token. Automatically generated in the Vercel dashboard.
+
+### App Configuration
+
+*   `NEXT_PUBLIC_APP_URL`: The base URL of your deployed site (e.g., `https://redraw.vercel.app`). Used for verification links.
 
 ## Supabase Integration
 

@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { formatDistanceToNow } from 'date-fns';
 import { useEffect } from 'react';
+import { AuthGuard } from '@/components/auth/AuthGuard';
 
 interface FeedPostProps {
   post: {
@@ -182,43 +183,48 @@ export default function FeedPost({ post }: FeedPostProps) {
     ? post.content 
     : post.content.slice(0, truncateLimit) + '...';
 
+  // Synchronize avatar and name for current user
+  const isPostAuthor = user && user.username === post.user.handle;
+  const postAvatar = isPostAuthor ? (user.avatar_url || post.user.avatar) : post.user.avatar;
+  const postName = isPostAuthor ? user.display_name : post.user.name;
+
   return (
-    <Card className="overflow-hidden border-none bg-background hover:bg-secondary/5 transition-colors rounded-none border-b border-border/50">
-      <div className="flex gap-3 md:gap-4 p-3 md:p-4">
+    <Card className="overflow-hidden border-none bg-background active:bg-secondary/5 transition-colors rounded-none border-b border-border/50">
+      <div className="flex gap-3 p-3">
         {/* Avatar */}
-        <Avatar className="h-10 w-10 md:h-12 md:w-12 flex-shrink-0 ring-2 ring-background shadow-sm">
-          <AvatarImage src={post.user.avatar} alt={post.user.name} />
-          <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs md:text-sm">{post.user.name[0]}</AvatarFallback>
+        <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-background shadow-sm">
+          <AvatarImage src={postAvatar} alt={postName} />
+          <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">{postName[0]}</AvatarFallback>
         </Avatar>
 
         {/* Content Area */}
-        <div className="flex flex-1 flex-col gap-2 md:gap-3 min-w-0">
+        <div className="flex flex-1 flex-col gap-2 min-w-0">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 md:gap-2 overflow-hidden min-w-0">
-              <span className="truncate font-bold text-[14px] md:text-[15px] text-foreground hover:underline cursor-pointer">
-                {post.user.name}
+            <div className="flex items-center gap-1.5 overflow-hidden min-w-0">
+              <span className="truncate font-bold text-[14px] text-foreground active:underline cursor-pointer">
+                {postName}
               </span>
-              <span className="truncate text-xs md:text-sm text-muted-foreground">@{post.user.handle}</span>
+              <span className="truncate text-xs text-muted-foreground">@{post.user.handle}</span>
               <span className="text-muted-foreground hidden xs:inline">·</span>
-              <span className="text-[10px] md:text-xs text-muted-foreground whitespace-nowrap hidden xs:inline">
+              <span className="text-[10px] text-muted-foreground whitespace-nowrap hidden xs:inline">
                 {formatDistanceToNow(post.createdAt)}
               </span>
             </div>
-            <Button variant="ghost" size="icon" className="h-7 w-7 md:h-8 md:w-8 text-muted-foreground rounded-full hover:bg-primary/10 hover:text-primary">
-              <MoreHorizontal className="h-3.5 w-3.5 md:h-4 md:w-4" />
+            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground rounded-full active:bg-primary/10 active:text-primary">
+              <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </div>
 
           {/* Text Content */}
           <div className="flex flex-col gap-1">
-            <p className="text-[14px] md:text-[15px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
+            <p className="text-[14px] leading-relaxed text-foreground/90 whitespace-pre-wrap break-words">
               {displayContent}
             </p>
             {shouldTruncate && (
               <button 
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="text-[10px] md:text-xs font-bold text-primary hover:underline self-start mt-1 uppercase tracking-wider font-action"
+                className="text-[10px] font-bold text-primary active:underline self-start mt-1 uppercase tracking-wider font-action"
               >
                 {isExpanded ? 'Show less' : 'Read more'}
               </button>
@@ -250,101 +256,113 @@ export default function FeedPost({ post }: FeedPostProps) {
           )}
 
           {/* Interaction Bar */}
-          <div className="mt-1 md:mt-2 flex items-center justify-between">
-            <div className="flex items-center gap-4 md:gap-6">
-              <button 
-                onClick={handleLike}
-                className="group flex items-center gap-1.5 md:gap-2 text-muted-foreground transition-colors hover:text-primary"
-              >
-                <div className={cn(
-                  "flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full transition-colors group-hover:bg-primary/10",
-                  isLiked && "text-primary"
-                )}>
-                  <Heart className={cn(
-                    "h-[16px] w-[16px] md:h-[18px] md:w-[18px] transition-all",
-                    isLiked && "fill-current scale-110 md:scale-125 animate-in zoom-in-75 duration-300"
-                  )} />
-                </div>
-                <span className={cn("text-[11px] md:text-xs font-medium", isLiked && "text-primary")}>{likeCount}</span>
-              </button>
+          <div className="mt-1 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <AuthGuard action="like posts">
+                <button 
+                  onClick={handleLike}
+                  className="group flex items-center gap-1.5 text-muted-foreground transition-colors active:text-primary"
+                >
+                  <div className={cn(
+                    "flex h-8 w-8 items-center justify-center rounded-full transition-colors active:bg-primary/10",
+                    isLiked && "text-primary"
+                  )}>
+                    <Heart className={cn(
+                      "h-[16px] w-[16px] transition-all",
+                      isLiked && "fill-current scale-110 animate-in zoom-in-75 duration-300"
+                    )} />
+                  </div>
+                  <span className={cn("text-[11px] font-medium", isLiked && "text-primary")}>{likeCount}</span>
+                </button>
+              </AuthGuard>
 
               <button 
                 onClick={() => setShowComments(!showComments)}
-                className="group flex items-center gap-1.5 md:gap-2 text-muted-foreground transition-colors hover:text-blue-500"
+                className="group flex items-center gap-1.5 text-muted-foreground transition-colors active:text-blue-500"
               >
-                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full transition-colors group-hover:bg-blue-500/10">
-                  <MessageCircle className={cn("h-[16px] w-[16px] md:h-[18px] md:w-[18px]", showComments && "text-blue-500 fill-blue-500/10")} />
+                <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors active:bg-blue-500/10">
+                  <MessageCircle className={cn("h-[16px] w-[16px]", showComments && "text-blue-500 fill-blue-500/10")} />
                 </div>
-                <span className={cn("text-[11px] md:text-xs font-medium", showComments && "text-blue-500")}>{commentsList.length}</span>
+                <span className={cn("text-[11px] font-medium", showComments && "text-blue-500")}>{commentsList.length}</span>
               </button>
 
-              <button className="group flex items-center gap-1.5 md:gap-2 text-muted-foreground transition-colors hover:text-green-500">
-                <div className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center rounded-full transition-colors group-hover:bg-green-500/10">
-                  <Share2 className="h-[16px] w-[16px] md:h-[18px] md:w-[18px]" />
-                </div>
-              </button>
+              <AuthGuard action="share posts">
+                <button className="group flex items-center gap-1.5 text-muted-foreground transition-colors active:text-green-500">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full transition-colors active:bg-green-500/10">
+                    <Share2 className="h-[16px] w-[16px]" />
+                  </div>
+                </button>
+              </AuthGuard>
             </div>
           </div>
 
           {/* Comments Section */}
           {showComments && (
-            <div className="mt-3 md:mt-4 space-y-3 md:space-y-4 border-t border-border/50 pt-3 md:pt-4">
+            <div className="mt-3 space-y-3 border-t border-border/50 pt-3">
               {commentsList.length > 0 ? (
-                <div className="space-y-3 md:space-y-4 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-1 md:pr-2 custom-scrollbar">
-                  {commentsList.map((c) => (
-                    <div key={c.id} className="flex gap-2 md:gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                      <Avatar className="h-7 w-7 md:h-8 md:w-8 ring-1 ring-border/50">
-                        <AvatarImage src={c.author_avatar} alt={c.author_name} />
-                        <AvatarFallback className="text-[9px] md:text-[10px] bg-primary/5">{c.author_name?.[0]}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 rounded-xl md:rounded-2xl bg-secondary/20 p-2 md:p-3 ring-1 ring-border/30">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] md:text-xs font-bold text-foreground">{c.author_name}</span>
-                          <span className="text-[9px] md:text-[10px] text-muted-foreground">
-                            {c.created_at ? formatDistanceToNow(new Date(c.created_at)) : 'just now'}
-                          </span>
+                <div className="space-y-3 max-h-[300px] overflow-y-auto pr-1 custom-scrollbar">
+                  {commentsList.map((c) => {
+                    const isCommentAuthor = user && user.id.toString() === c.author_id.toString();
+                    const commentAvatar = isCommentAuthor ? (user.avatar_url || c.author_avatar) : c.author_avatar;
+                    const commentName = isCommentAuthor ? user.display_name : c.author_name;
+
+                    return (
+                      <div key={c.id} className="flex gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <Avatar className="h-7 w-7 ring-1 ring-border/50">
+                          <AvatarImage src={commentAvatar} alt={commentName} />
+                          <AvatarFallback className="text-[9px] bg-primary/5">{commentName?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 rounded-xl bg-secondary/20 p-2 ring-1 ring-border/30">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-sm font-bold text-foreground">{commentName}</span>
+                            <span className="text-[11px] text-muted-foreground">
+                              {c.created_at ? formatDistanceToNow(new Date(c.created_at)) : 'just now'}
+                            </span>
+                          </div>
+                          <p className="mt-0.5 text-[13px] text-foreground/90 leading-relaxed">{c.content}</p>
                         </div>
-                        <p className="mt-0.5 md:mt-1 text-[13px] md:text-sm text-foreground/90 leading-relaxed">{c.content}</p>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
-                <p className="text-center text-[10px] md:text-xs text-muted-foreground py-1 md:py-2 italic">No replies yet. Be the first to post!</p>
+                <p className="text-center text-[10px] text-muted-foreground py-1 italic">No replies yet. Be the first to post!</p>
               )}
             </div>
           )}
 
           {/* Inline Comment Input */}
-          <form 
-            onSubmit={handleCommentSubmit}
-            className="mt-3 md:mt-4 flex items-center gap-2 md:gap-3 bg-secondary/30 rounded-xl md:rounded-2xl px-2 md:px-3 py-1.5 md:py-2 ring-1 ring-inset ring-transparent focus-within:ring-primary/50 transition-all"
-          >
-            <Avatar className="h-6 w-6 md:h-7 md:w-7 ring-1 ring-background">
-              <AvatarImage src={user?.avatar_url} />
-              <AvatarFallback className="text-[9px] md:text-[10px] font-bold bg-primary/10">{user?.display_name?.[0] || '?'}</AvatarFallback>
-            </Avatar>
-            <input 
-              type="text"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Post your reply"
-              className="flex-1 bg-transparent text-[13px] md:text-sm outline-none placeholder:text-muted-foreground"
-              disabled={isSubmittingComment}
-            />
-            <Button 
-              type="submit"
-              size="icon" 
-              variant="ghost" 
-              className={cn(
-                "h-7 w-7 md:h-8 md:w-8 rounded-full transition-all",
-                comment.trim() ? "text-primary hover:bg-primary/10 scale-105 md:scale-110" : "text-muted-foreground/30 cursor-not-allowed"
-              )}
-              disabled={!comment.trim() || isSubmittingComment}
+          <AuthGuard action="post comments" mode="dialog">
+            <form 
+              onSubmit={handleCommentSubmit}
+              className="mt-3 flex items-center gap-2 bg-secondary/30 rounded-xl px-2 py-1.5 ring-1 ring-inset ring-transparent focus-within:ring-primary/50 transition-all"
             >
-              <Send className={cn("h-3.5 w-3.5 md:h-4 md:w-4", isSubmittingComment && "animate-pulse")} />
-            </Button>
-          </form>
+              <Avatar className="h-6 w-6 ring-1 ring-background">
+                <AvatarImage src={user?.avatar_url} />
+                <AvatarFallback className="text-[9px] font-bold bg-primary/10">{user?.display_name?.[0] || '?'}</AvatarFallback>
+              </Avatar>
+              <input 
+                type="text"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="Post your reply"
+                className="flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+                disabled={isSubmittingComment}
+              />
+              <Button 
+                type="submit"
+                size="icon" 
+                variant="ghost" 
+                className={cn(
+                  "h-7 w-7 rounded-full transition-all",
+                  comment.trim() ? "text-primary active:bg-primary/10 scale-105" : "text-muted-foreground/30 cursor-not-allowed"
+                )}
+                disabled={!comment.trim() || isSubmittingComment}
+              >
+                <Send className={cn("h-3.5 w-3.5", isSubmittingComment && "animate-pulse")} />
+              </Button>
+            </form>
+          </AuthGuard>
         </div>
       </div>
     </Card>

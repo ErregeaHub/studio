@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthGuard } from '@/hooks/use-auth-guard';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,13 +23,20 @@ const ProfileSettingsPage = () => {
   const { username } = params;
 
   const { toast } = useToast();
+  const { checkAuth } = useAuthGuard();
 
   const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<ProfileUpdateInput>({
     resolver: zodResolver(ProfileUpdateSchema),
   });
 
-  const { user: currentUser, updateUser } = useAuth();
+  const { user: currentUser, updateUser, isLoading: isUserLoading } = useAuth();
   const [profileUser, setProfileUser] = useState<typeof currentUser | null>(null);
+
+  useEffect(() => {
+    if (!isUserLoading && !currentUser) {
+      checkAuth('manage settings');
+    }
+  }, [currentUser, isUserLoading, checkAuth]);
 
   useEffect(() => {
     const fetchProfileUser = async () => {

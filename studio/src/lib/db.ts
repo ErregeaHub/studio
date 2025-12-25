@@ -1,7 +1,11 @@
-import { Pool } from 'pg';
+import { Pool, types } from 'pg';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Force BIGINT (OID 20) to be parsed as number
+// Note: This is safe as long as the values don't exceed Number.MAX_SAFE_INTEGER
+types.setTypeParser(20, (val) => parseInt(val, 10));
 
 /**
  * Database connection pool configuration for PostgreSQL
@@ -52,9 +56,10 @@ if (useSSL && typeof poolConfig.ssl === 'object') {
 
 const pool = new Pool({
   ...poolConfig,
-  max: 20, // Increased for Supabase
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  max: 10, // Reduced for transaction mode compatibility
+  idleTimeoutMillis: 10000,
+  connectionTimeoutMillis: 15000, // Increased for remote Supabase
+  keepAlive: true,
 });
 
 console.log('--- Supabase (PostgreSQL) Connection Diagnostic ---');
@@ -73,6 +78,7 @@ console.log('---------------------------------------');
  * Execute a query using a prepared statement
  */
 export async function query<T>(sql: string, params?: any[]): Promise<T> {
+  let client;
   try {
     // Convert MySQL style "?" to PostgreSQL style "$1, $2, ..."
     let pgSql = sql;
@@ -81,18 +87,25 @@ export async function query<T>(sql: string, params?: any[]): Promise<T> {
       pgSql = sql.replace(/\?/g, () => `$${index++}`);
     }
 
-    const result = await pool.query(pgSql, params);
+    client = await pool.connect();
+    const result = await client.query(pgSql, params);
     
-    // MySQL returns results directly for SELECT, PG returns rows
-    if (pgSql.trim().toUpperCase().startsWith('SELECT')) {
+    // For SELECT queries, CTEs, or queries with RETURNING clause, return rows
+     const isQueryReturningRows = 
+       pgSql.trim().toUpperCase().startsWith('SELECT') || 
+       pgSql.trim().toUpperCase().startsWith('WITH') || 
+       pgSql.trim().toUpperCase().includes('RETURNING');
+
+    if (isQueryReturningRows) {
       return result.rows as any as T;
     }
     
-    // For INSERT/UPDATE/DELETE, return the result object or rowCount
     return result as any as T;
   } catch (error: any) {
     console.error('Database Query Error:', error.message);
     throw new Error(`Database operation failed: ${error.message}`);
+  } finally {
+    if (client) client.release();
   }
 }
 

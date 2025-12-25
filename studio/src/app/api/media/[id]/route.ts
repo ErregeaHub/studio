@@ -36,7 +36,9 @@ export async function DELETE(
     }
 
     const mediaRepo = new MediaRepository();
-    const deleted = await mediaRepo.deleteMedia(id, 'some_user_id'); // Placeholder for user ID
+    // In a real app, you would get the user ID from the session
+    const uploaderId = 1; // Placeholder
+    const deleted = await mediaRepo.deleteMedia(parseInt(id), uploaderId);
 
     if (!deleted) {
       return NextResponse.json({ error: 'Media not found or user not authorized to delete' }, { status: 404 });

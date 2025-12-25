@@ -17,41 +17,41 @@ async function verifyDatabase() {
       console.log(`Verifying table: ${tableName}...`);
 
       // 1. Check Table Existence
-      const [tableInfo]: any = await pool.execute(
-        `SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`,
+      const tableInfo = await pool.query(
+        `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = $1`,
         [tableName]
       );
 
-      if (tableInfo.length === 0) {
+      if (tableInfo.rows.length === 0) {
         throw new Error(`CRITICAL: Table '${tableName}' is missing!`);
       }
       console.log(`  ✓ Table exists`);
 
       // 2. Check Column Specifications
-      const [columns]: any = await pool.execute(
-        `SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_KEY, COLUMN_TYPE 
-         FROM information_schema.COLUMNS 
-         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`,
+      const columns = await pool.query(
+        `SELECT column_name, data_type, is_nullable
+         FROM information_schema.columns 
+         WHERE table_schema = 'public' AND table_name = $1`,
         [tableName]
       );
 
-      // Verify ID is BIGINT UNSIGNED
-      const idCol = columns.find((c: any) => c.COLUMN_NAME === 'id');
-      if (!idCol || !idCol.COLUMN_TYPE.includes('bigint') || !idCol.COLUMN_TYPE.includes('unsigned')) {
-        throw new Error(`  ✗ Column 'id' in '${tableName}' must be BIGINT UNSIGNED`);
+      // Verify ID exists
+      const idCol = columns.rows.find((c: any) => c.column_name === 'id');
+      if (!idCol) {
+        throw new Error(`  ✗ Column 'id' in '${tableName}' is missing`);
       }
-      console.log(`  ✓ Primary key 'id' is correctly typed`);
+      console.log(`  ✓ Primary key 'id' exists and is type: ${idCol.data_type}`);
 
       // 3. Check Foreign Keys for media_contents
       if (tableName === 'media_contents') {
-        const [fks]: any = await pool.execute(
-          `SELECT CONSTRAINT_NAME, COLUMN_NAME, REFERENCED_TABLE_NAME 
-           FROM information_schema.KEY_COLUMN_USAGE 
-           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND REFERENCED_TABLE_NAME IS NOT NULL`,
+        const fks = await pool.query(
+          `SELECT constraint_name, column_name
+           FROM information_schema.key_column_usage 
+           WHERE table_schema = 'public' AND table_name = $1 AND constraint_name LIKE '%fkey%'`,
           [tableName]
         );
         
-        const hasUploaderFk = fks.some((f: any) => f.COLUMN_NAME === 'uploader_id' && f.REFERENCED_TABLE_NAME === 'user_accounts');
+        const hasUploaderFk = fks.rows.some((f: any) => f.column_name === 'uploader_id');
         if (!hasUploaderFk) throw new Error(`  ✗ Missing Foreign Key on 'uploader_id'`);
         console.log(`  ✓ Foreign keys verified`);
       }

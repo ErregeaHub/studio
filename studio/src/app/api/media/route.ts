@@ -2,10 +2,21 @@ import { NextResponse } from 'next/server';
 import { MediaRepository } from '@/lib/repositories';
 import { put } from '@vercel/blob';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const following = searchParams.get('following');
+    const userId = searchParams.get('userId');
+
     const mediaRepo = new MediaRepository();
-    const media = await mediaRepo.findAllWithDetails();
+    let media;
+
+    if (following === 'true' && userId) {
+      media = await mediaRepo.findFollowingFeed(parseInt(userId));
+    } else {
+      media = await mediaRepo.findAllWithDetails();
+    }
+
     return NextResponse.json(media);
   } catch (error: any) {
     console.error('API Error (Media List):', error);
