@@ -15,7 +15,13 @@ const cleanEnv = (val: string | undefined) => {
 };
 
 // Explicitly resolve connection parameters
-const connectionString = cleanEnv(process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL);
+let connectionString = cleanEnv(process.env.POSTGRES_URL || process.env.DATABASE_URL || process.env.POSTGRES_PRISMA_URL);
+
+// If connection string contains sslmode, it might interfere with our JS config.
+// We'll handle SSL explicitly in the pool config.
+if (connectionString && connectionString.includes('sslmode=')) {
+  connectionString = connectionString.replace(/([?&])sslmode=[^&]*/, '$1').replace(/[?&]$/, '');
+}
 const resolvedHost = cleanEnv(process.env.DB_HOST || process.env.DATABASE_HOST || process.env.POSTGRES_HOST || process.env.SUPABASE_HOST);
 const resolvedPort = cleanEnv(process.env.DB_PORT || process.env.DATABASE_PORT || process.env.POSTGRES_PORT || process.env.SUPABASE_PORT) || '5432';
 const resolvedUser = cleanEnv(process.env.DB_USERNAME || process.env.DB_USER || process.env.DATABASE_USERNAME || process.env.DATABASE_USER || process.env.POSTGRES_USER || process.env.SUPABASE_USER);
@@ -25,7 +31,9 @@ const useSSL = cleanEnv(process.env.DB_SSL || process.env.DATABASE_SSL || proces
 
 const poolConfig: any = connectionString ? {
   connectionString,
-  ssl: useSSL ? { rejectUnauthorized: false } : false,
+  ssl: useSSL ? {
+    rejectUnauthorized: false,
+  } : false,
 } : {
   host: resolvedHost,
   port: parseInt(resolvedPort),
@@ -36,6 +44,11 @@ const poolConfig: any = connectionString ? {
     rejectUnauthorized: false, // Required for Supabase and other managed PG services
   } : false,
 };
+
+// Force rejectUnauthorized: false globally for the pg library if SSL is requested
+if (useSSL && typeof poolConfig.ssl === 'object') {
+  poolConfig.ssl.rejectUnauthorized = false;
+}
 
 const pool = new Pool({
   ...poolConfig,
