@@ -3,7 +3,8 @@ import { Resend } from 'resend';
 const resend = new Resend(process.env.RESEND_API_KEY || process.env.EMAIL_PASS);
 
 export async function sendVerificationEmail(email: string, token: string) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
+  // Use the configured app URL or default to localhost for development
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || 'http://localhost:9002';
   const verificationLink = `${baseUrl}/verify?token=${token}`;
 
   try {
@@ -36,7 +37,7 @@ export async function sendVerificationEmail(email: string, token: string) {
 
     if (error) {
       if ((error as any).statusCode === 403 || error.name === 'validation_error') {
-        console.error('Resend Restriction: You are using a test domain. You can only send emails to your own registered email address (gardaqurajaaa@gmail.com).');
+        console.error('Resend Restriction: If you are using a test domain, you can only send emails to your own registered email address. For production, please ensure your domain is verified in Resend and EMAIL_FROM is set correctly in your environment variables.');
       } else {
         console.error('Resend API Error:', error);
       }
