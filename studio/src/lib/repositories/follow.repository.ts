@@ -10,7 +10,7 @@ export interface Follow {
 export class FollowRepository extends BaseRepository<Follow> {
   protected tableName = 'follows';
 
-  async follow(followerId: number, followingId: number): Promise<void> {
+  async followUser(followerId: number, followingId: number): Promise<void> {
     await query(
       `INSERT INTO ${this.tableName} (follower_id, following_id) 
        VALUES (?, ?) 
@@ -19,7 +19,7 @@ export class FollowRepository extends BaseRepository<Follow> {
     );
   }
 
-  async unfollow(followerId: number, followingId: number): Promise<void> {
+  async unfollowUser(followerId: number, followingId: number): Promise<void> {
     await query(
       `DELETE FROM ${this.tableName} WHERE follower_id = ? AND following_id = ?`,
       [followerId, followingId]

@@ -86,8 +86,8 @@ const ProfileSettingsPage = () => {
     }
 
     try {
-      const response = await fetch(`/api/users/update/${profileUser.id}`, {
-        method: 'PUT',
+      const response = await fetch(`/api/users/${profileUser.id}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },

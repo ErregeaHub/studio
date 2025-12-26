@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Image, Film, BarChart2, Smile, X, Loader2, Globe, ChevronDown } from 'lucide-react';
+import { Image, Film, X, Loader2, Globe, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -242,7 +242,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 disabled={isSubmitting}
                 title="Add Poll"
               >
-                <BarChart2 className="h-5 w-5" />
+                
               </Button>
               <Button 
                 variant="ghost" 
@@ -251,7 +251,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 disabled={isSubmitting}
                 title="Emoji"
               >
-                <Smile className="h-5 w-5" />
+                
               </Button>
             </div>
             
@@ -277,7 +277,7 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <Loader2 className="h-3 w-3 animate-spin" />
                     <span>Posting</span>
                   </div>
                 ) : 'Post'}

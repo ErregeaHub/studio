@@ -14,14 +14,14 @@ export async function GET(
     }
 
     const followRepo = new FollowRepository();
-    const [followersCount, followingCount] = await Promise.all([
-      followRepo.getFollowersCount(userId),
-      followRepo.getFollowingCount(userId)
-    ]);
+    const following = await followRepo.getFollowing(userId);
 
-    return NextResponse.json({ followersCount, followingCount });
+    return NextResponse.json(following);
   } catch (error: any) {
-    console.error('API Error (Get User Stats):', error);
-    return NextResponse.json({ error: 'Failed to fetch user stats' }, { status: 500 });
+    console.error('API Error (Get Following):', error);
+    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+      return NextResponse.json({ error: 'Database connection timeout' }, { status: 504 });
+    }
+    return NextResponse.json({ error: 'Failed to fetch following' }, { status: 500 });
   }
 }

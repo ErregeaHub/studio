@@ -73,7 +73,7 @@ export default function SettingsPage() {
     formData.append('avatar', file);
 
     try {
-      const response = await fetch(`/api/users/avatar/${user.id}`, {
+      const response = await fetch(`/api/users/${user.id}/avatar`, {
         method: 'POST',
         body: formData,
       });
@@ -95,7 +95,7 @@ export default function SettingsPage() {
     e.preventDefault();
     setIsUpdating(true);
     try {
-      const response = await fetch(`/api/users/update/${user?.id}`, {
+      const response = await fetch(`/api/users/${user?.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ display_name: displayName, username, bio }),

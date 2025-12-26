@@ -23,10 +23,10 @@ export async function POST(
     const isFollowing = await followRepo.isFollowing(followerId, followingId);
 
     if (isFollowing) {
-      await followRepo.unfollow(followerId, followingId);
+      await followRepo.unfollowUser(followerId, followingId);
       return NextResponse.json({ isFollowing: false });
     } else {
-      await followRepo.follow(followerId, followingId);
+      await followRepo.followUser(followerId, followingId);
       
       // Create notification
       try {
@@ -38,13 +38,15 @@ export async function POST(
         });
       } catch (err) {
         console.error('Failed to create notification:', err);
-        // Continue even if notification fails
       }
 
       return NextResponse.json({ isFollowing: true });
     }
   } catch (error: any) {
     console.error('API Error (Toggle Follow):', error);
+    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+      return NextResponse.json({ error: 'Database connection timeout' }, { status: 504 });
+    }
     return NextResponse.json({ error: 'Failed to toggle follow' }, { status: 500 });
   }
 }
@@ -70,6 +72,9 @@ export async function GET(
     return NextResponse.json({ isFollowing });
   } catch (error: any) {
     console.error('API Error (Check Follow Status):', error);
+    if (error.message?.includes('timeout') || error.code === 'ETIMEDOUT') {
+      return NextResponse.json({ error: 'Database connection timeout' }, { status: 504 });
+    }
     return NextResponse.json({ error: 'Failed to check follow status' }, { status: 500 });
   }
 }

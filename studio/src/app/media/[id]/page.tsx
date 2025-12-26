@@ -67,7 +67,7 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
   const checkFollowStatus = async () => {
     if (!user || !media) return;
     try {
-      const res = await fetch(`/api/users/id/${media.uploader_id}/follow?follower_id=${user.id}`);
+      const res = await fetch(`/api/users/${media.uploader_id}/follow?follower_id=${user.id}`);
       if (res.ok) {
         const data = await res.json();
         setIsFollowing(data.isFollowing);
@@ -89,7 +89,7 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
 
     setIsFollowLoading(true);
     try {
-      const response = await fetch(`/api/users/id/${media.uploader_id}/follow`, {
+      const response = await fetch(`/api/users/${media.uploader_id}/follow`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ followerId: user.id })
