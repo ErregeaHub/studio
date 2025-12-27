@@ -17,25 +17,25 @@ export default function DiscoverPage() {
     else setIsFetchingMore(true);
 
     try {
-      const response = await fetch('/api/media');
+      const response = await fetch('/api/media?limit=20');
       const data = await response.json();
-      
-      if (Array.isArray(data)) {
+
+      // Handle new paginated API response
+      const posts = data.posts || [];
+
+      if (Array.isArray(posts)) {
         // Assign random ratios to media items for the masonry effect
         const ratios = ['aspect-[3/4]', 'aspect-square', 'aspect-[2/3]', 'aspect-[4/5]'];
-        const dataWithRatios = data.map(item => ({
+        const dataWithRatios = posts.map(item => ({
           ...item,
           ratio: ratios[Math.floor(Math.random() * ratios.length)]
         }));
 
         // Shuffling to simulate a "random" discover feed
         const shuffled = [...dataWithRatios].sort(() => Math.random() - 0.5);
-        
+
         setMediaList(prev => isInitial ? shuffled : [...prev, ...shuffled]);
-        
-        if (!isInitial && Math.random() > 0.8) {
-          setHasMore(false);
-        }
+        setHasMore(data.hasMore || false);
       }
     } catch (error) {
       console.error('Failed to fetch media:', error);
@@ -72,11 +72,10 @@ export default function DiscoverPage() {
         {isLoading ? (
           <div className="columns-2 gap-0.5 sm:columns-3 md:columns-4 lg:columns-5">
             {[...Array(15)].map((_, i) => (
-              <Skeleton 
-                key={i} 
-                className={`w-full mb-0.5 rounded-none bg-muted ${
-                  i % 3 === 0 ? 'h-64' : i % 3 === 1 ? 'h-40' : 'h-52'
-                }`} 
+              <Skeleton
+                key={i}
+                className={`w-full mb-0.5 rounded-none bg-muted ${i % 3 === 0 ? 'h-64' : i % 3 === 1 ? 'h-40' : 'h-52'
+                  }`}
               />
             ))}
           </div>
@@ -85,7 +84,7 @@ export default function DiscoverPage() {
             <div className="columns-2 gap-0.5 sm:columns-3 md:columns-4 lg:columns-5">
               {mediaList.map((mediaItem, index) => (
                 <div key={`${mediaItem.id}-${index}`} className="mb-0.5 break-inside-avoid">
-                  <DiscoverMediaCard 
+                  <DiscoverMediaCard
                     media={{
                       id: mediaItem.id.toString(),
                       type: mediaItem.type || 'photo',
@@ -95,15 +94,15 @@ export default function DiscoverPage() {
                       commentsCount: 0,
                       ratio: mediaItem.ratio,
                       isGallery: Math.random() > 0.8
-                    }} 
+                    }}
                   />
                 </div>
               ))}
             </div>
 
             {/* Infinite Scroll Trigger */}
-            <div 
-              ref={observerTarget} 
+            <div
+              ref={observerTarget}
               className="h-20 flex items-center justify-center mt-4 mb-10"
             >
               {isFetchingMore && (

@@ -7,17 +7,25 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const following = searchParams.get('following');
     const userId = searchParams.get('userId');
+    const cursor = searchParams.get('cursor');
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const sort = (searchParams.get('sort') || 'newest') as 'newest' | 'popular' | 'most-viewed';
 
     const mediaRepo = new MediaRepository();
-    let media;
+    let media: any[];
 
     if (following === 'true' && userId) {
-      media = await mediaRepo.findFollowingFeed(parseInt(userId));
+      media = await mediaRepo.findFollowingPaginated(parseInt(userId), cursor, limit);
     } else {
-      media = await mediaRepo.findAllWithDetails();
+      media = await mediaRepo.findPaginated(cursor, limit, sort);
     }
 
-    return NextResponse.json(media);
+    // Return paginated response
+    return NextResponse.json({
+      posts: media,
+      nextCursor: media.length > 0 ? media[media.length - 1].id.toString() : null,
+      hasMore: media.length === limit,
+    });
   } catch (error: any) {
     console.error('API Error (Media List):', error);
     return NextResponse.json({ error: 'Failed to fetch media' }, { status: 500 });
@@ -31,11 +39,30 @@ export async function POST(request: Request) {
     const thumbnailFile = formData.get('thumbnail') as File | null;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const uploader_id = parseInt(formData.get('uploader_id') as string);
     const type = formData.get('type') as 'photo' | 'video';
 
-    if (!file || !uploader_id) {
-      return NextResponse.json({ error: 'File and Uploader ID are required' }, { status: 400 });
+    // Get the authenticated user from Supabase
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Map Supabase user to DB user
+    const { UserRepository } = await import('@/lib/repositories');
+    const userRepo = new UserRepository();
+    const dbUser = await userRepo.findByEmail(user.email!);
+
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+    }
+
+    const uploader_id = dbUser.id;
+
+    if (!file) {
+      return NextResponse.json({ error: 'File is required' }, { status: 400 });
     }
 
     // Upload main file to Vercel Blob

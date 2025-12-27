@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    
+
     // 1. Validate Input & Sanitize (Zod handles basic types)
     const validatedData = SignupSchema.safeParse(body);
     if (!validatedData.success) {
@@ -52,7 +52,30 @@ export async function POST(request: Request) {
     // 4. Generate Verification Token
     const verification_token = uuidv4();
 
-    // 5. Create User
+    // --- Supabase User Creation ---
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+
+    // We sign up with Supabase first. 
+    // If you have "Confirm Email" enabled in Supabase, this will send its own email.
+    const { data: sbData, error: sbError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username,
+          display_name,
+        }
+      }
+    });
+
+    if (sbError) {
+      console.error('Supabase Signup Error:', sbError);
+      return NextResponse.json({ error: sbError.message }, { status: 400 });
+    }
+    // ------------------------------
+
+    // 5. Create User in local DB
     const newUser = await userRepo.create({
       username,
       email,

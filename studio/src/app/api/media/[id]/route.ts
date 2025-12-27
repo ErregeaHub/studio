@@ -36,9 +36,27 @@ export async function DELETE(
     }
 
     const mediaRepo = new MediaRepository();
-    // In a real app, you would get the user ID from the session
-    const uploaderId = 1; // Placeholder
-    const deleted = await mediaRepo.deleteMedia(parseInt(id), uploaderId);
+
+    // Get the authenticated user from Supabase
+    const { createClient } = await import('@/lib/supabase/server');
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Since our database uses integer IDs, we might need to map Supabase UUID to our DB user ID
+    // For now, if your DB user ID is stored in Supabase user metadata or if you use email to lookup:
+    const { UserRepository } = await import('@/lib/repositories');
+    const userRepo = new UserRepository();
+    const dbUser = await userRepo.findByEmail(user.email!);
+
+    if (!dbUser) {
+      return NextResponse.json({ error: 'User not found in database' }, { status: 404 });
+    }
+
+    const deleted = await mediaRepo.deleteMedia(parseInt(id), dbUser.id);
 
     if (!deleted) {
       return NextResponse.json({ error: 'Media not found or user not authorized to delete' }, { status: 404 });

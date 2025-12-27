@@ -21,7 +21,7 @@ export class MediaRepository extends BaseRepository<MediaContent> {
 
   async create(data: MediaContentInput): Promise<MediaContent> {
     const validatedData = MediaContentSchema.parse(data);
-    
+
     const results = await query<MediaContent[]>(
       `INSERT INTO ${this.tableName} 
        (uploader_id, type, title, description, media_url, thumbnail_url) 
@@ -125,5 +125,78 @@ export class MediaRepository extends BaseRepository<MediaContent> {
       [id, uploaderId]
     );
     return (result.rowCount || 0) > 0;
+  }
+
+  async findPaginated(
+    cursor: string | null,
+    limit: number = 10,
+    sort: 'newest' | 'popular' | 'most-viewed' = 'newest'
+  ): Promise<any[]> {
+    let orderBy = 'm.created_at DESC, m.id DESC';
+    let whereClause = '';
+    const params: any[] = [];
+
+    // Add cursor filter if provided
+    if (cursor) {
+      whereClause = 'WHERE m.id < ?';
+      params.push(parseInt(cursor));
+    }
+
+    // Determine sort order
+    switch (sort) {
+      case 'popular':
+        orderBy = 'm.likes_count DESC, m.id DESC';
+        break;
+      case 'most-viewed':
+        orderBy = 'm.views_count DESC, m.id DESC';
+        break;
+      default:
+        orderBy = 'm.created_at DESC, m.id DESC';
+    }
+
+    params.push(limit);
+
+    return await query<any[]>(
+      `SELECT m.*, u.username, u.display_name, u.avatar_url,
+              COUNT(DISTINCT c.id) as comments_count
+       FROM ${this.tableName} m
+       LEFT JOIN user_accounts u ON m.uploader_id = u.id
+       LEFT JOIN comments c ON c.media_id = m.id
+       ${whereClause}
+       GROUP BY m.id, u.id, u.username, u.display_name, u.avatar_url
+       ORDER BY ${orderBy}
+       LIMIT ?`,
+      params
+    );
+  }
+
+  async findFollowingPaginated(
+    userId: number,
+    cursor: string | null,
+    limit: number = 10
+  ): Promise<any[]> {
+    const params: any[] = [userId];
+    let whereClause = 'WHERE f.follower_id = ?';
+
+    if (cursor) {
+      whereClause += ' AND m.id < ?';
+      params.push(parseInt(cursor));
+    }
+
+    params.push(limit);
+
+    return await query<any[]>(
+      `SELECT m.*, u.username, u.display_name, u.avatar_url,
+              COUNT(DISTINCT c.id) as comments_count
+       FROM ${this.tableName} m
+       JOIN user_accounts u ON m.uploader_id = u.id
+       JOIN follows f ON f.following_id = u.id
+       LEFT JOIN comments c ON c.media_id = m.id
+       ${whereClause}
+       GROUP BY m.id, u.id, u.username, u.display_name, u.avatar_url
+       ORDER BY m.created_at DESC, m.id DESC
+       LIMIT ?`,
+      params
+    );
   }
 }
