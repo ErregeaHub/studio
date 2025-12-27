@@ -57,7 +57,10 @@ export default function MediaCard({ media }: MediaCardProps) {
             <AvatarFallback>{media.user.name?.charAt(0) || 'U'}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm text-muted-foreground truncate">{media.user.name}</p>
+            <h3 className="text-sm font-semibold text-foreground truncate mb-0.5">
+              {media.title}
+            </h3>
+            <p className="text-xs text-muted-foreground truncate">{media.user.name}</p>
             <div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
               <div className="flex items-center gap-1.5 bg-secondary/20 px-2 py-1 rounded-full">
                 <Heart className="h-3.5 w-3.5" />

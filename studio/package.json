@@ -12,7 +12,7 @@
     "test:db": "tsx src/tests/db.test.ts",
     "verify-db": "tsx src/scripts/verify-db.ts",
     "typecheck": "tsc --noEmit",
-    "log-media-count": "ts-node src/scripts/log-media-count.ts"
+    "log-media-count": "tsx src/scripts/log-media-count.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.3",
@@ -81,5 +81,14 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.21.0",
     "typescript": "^5"
-  }
+  },
+  "description": "RedRAW is a raw and powerful, dark-themed content sharing platform designed for an engaging user experience. It allows users to upload, share, and discover photos and videos, sorted by popularity.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
 }

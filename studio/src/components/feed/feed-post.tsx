@@ -201,11 +201,11 @@ export default function FeedPost({ post }: FeedPostProps) {
         <div className="flex flex-1 flex-col gap-2 min-w-0">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5 overflow-hidden min-w-0">
-              <span className="truncate font-bold text-[14px] text-foreground active:underline cursor-pointer">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-semibold text-foreground truncate cursor-pointer active:underline">
                 {postName}
-              </span>
-              <span className="truncate text-xs text-muted-foreground">@{post.user.handle}</span>
+              </h3>
+              <p className="text-xs text-muted-foreground truncate">@{post.user.handle}</p>
               <span className="text-muted-foreground hidden xs:inline">·</span>
               <span className="text-[10px] text-muted-foreground whitespace-nowrap hidden xs:inline">
                 {formatDistanceToNow(post.createdAt)}

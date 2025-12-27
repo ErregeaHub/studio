@@ -1,5 +1,6 @@
+import { Inter, Montserrat } from 'next/font/google';
 import { AuthProvider } from '../context/AuthContext';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
@@ -7,10 +8,80 @@ import BottomNav from '@/components/layout/bottom-nav';
 import AppHeader from '@/components/layout/app-header';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { QueryProvider } from '@/components/providers/query-provider';
+import GoogleAnalytics from '@/components/google-analytics';
+import { getBaseUrl } from '@/lib/urls';
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+  weight: ['600', '800'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
-  title: 'RedRAW',
-  description: 'A raw and powerful content platform for creators.',
+  metadataBase: new URL(getBaseUrl()),
+  title: {
+    default: 'RedRAW | Raw Creator Platform',
+    template: '%s | RedRAW',
+  },
+  description: 'A raw and powerful content platform for creators to share photos and videos.',
+  keywords: ['content platform', 'creators', 'photo sharing', 'video sharing', 'raw content'],
+  authors: [{ name: 'RedRAW Team' }],
+  creator: 'RedRAW',
+  publisher: 'RedRAW',
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+  },
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: getBaseUrl(),
+    siteName: 'RedRAW',
+    title: 'RedRAW | Raw Creator Platform',
+    description: 'A raw and powerful content platform for creators to share photos and videos.',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'RedRAW Platform',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RedRAW | Raw Creator Platform',
+    description: 'A raw and powerful content platform for creators to share photos and videos.',
+    images: ['/og-image.png'],
+    creator: '@redraw',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: '#000000',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({
@@ -19,13 +90,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@600;800&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="en" className={cn('dark', inter.variable, montserrat.variable)}>
       <body className={cn('font-body antialiased', 'bg-background text-foreground')}>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
         <QueryProvider>
           <AuthProvider>
             <SidebarProvider defaultOpen={true}>

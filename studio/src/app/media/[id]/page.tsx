@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
 import { cn } from '@/lib/utils';
 import CommentSection from '@/components/comment-section';
+import Breadcrumbs from '@/components/ui/breadcrumbs';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -219,6 +220,14 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
 
   return (
     <div className="container mx-auto max-w-6xl px-4 py-6 md:py-10">
+      <Breadcrumbs 
+        items={[
+          { label: 'Discover', href: '/discover' },
+          { label: media.type === 'video' ? 'Videos' : 'Photos', href: media.type === 'video' ? '/videos' : '/photos' },
+          { label: media.title }
+        ]}
+        className="mb-6"
+      />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="overflow-hidden border-none bg-black ring-1 ring-border/50">

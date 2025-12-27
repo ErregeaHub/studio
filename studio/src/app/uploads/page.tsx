@@ -17,10 +17,12 @@ export default function UploadPage() {
   const router = useRouter();
   const { toast } = useToast();
 
+  const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
   
   const [isUploading, setIsUploading] = useState(false);
+  const [isGeneratingSEO, setIsGeneratingSEO] = useState(false);
   const [preview, setPreview] = useState<{ url: string; type: string } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,7 +88,7 @@ export default function UploadPage() {
       
       const formData = new FormData();
       formData.append('file', file);
-      formData.append('title', ''); // Title is no longer used, kept for DB compatibility
+      formData.append('title', title || file.name.split('.')[0]);
       formData.append('description', description);
       formData.append('type', type);
       formData.append('uploader_id', user.id.toString());
@@ -163,7 +165,7 @@ export default function UploadPage() {
     });
   };
   
-  const canSubmit = !isUploading && !isUserLoading && !!file && !!user;
+  const canSubmit = !isUploading && !isUserLoading && !!file && !!user && !!title;
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-8">
@@ -220,7 +222,19 @@ export default function UploadPage() {
 
             <div className="space-y-6">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Description</label>
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Title (SEO Optimized)</label>
+                <input
+                  type="text"
+                  placeholder="Enter a descriptive, keyword-rich title..."
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="w-full bg-background/50 border border-border/50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">Description (SEO Rich)</label>
                 <Textarea
                   placeholder="Tell us more about your creation..."
                   value={description}
