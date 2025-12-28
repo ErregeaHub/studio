@@ -90,6 +90,7 @@ export default function DiscoverPage() {
                       type: mediaItem.type || 'photo',
                       title: mediaItem.title,
                       thumbnailUrl: mediaItem.thumbnail_url || mediaItem.media_url,
+                      description: mediaItem.description,
                       likes: mediaItem.likes_count || 0,
                       commentsCount: 0,
                       ratio: mediaItem.ratio,

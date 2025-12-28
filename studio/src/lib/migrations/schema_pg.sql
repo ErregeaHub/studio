@@ -39,7 +39,7 @@ CREATE TRIGGER update_user_accounts_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- 2. Media Contents Table
-CREATE TYPE media_type AS ENUM ('photo', 'video');
+CREATE TYPE media_type AS ENUM ('photo', 'video', 'text');
 
 CREATE TABLE IF NOT EXISTS media_contents (
     id SERIAL PRIMARY KEY,
@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS media_contents (
     type media_type NOT NULL,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    media_url VARCHAR(255) NOT NULL,
-    thumbnail_url VARCHAR(255) NOT NULL,
+    media_url VARCHAR(255),
+    thumbnail_url VARCHAR(255),
     views_count BIGINT DEFAULT 0,
     likes_count BIGINT DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,

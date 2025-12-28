@@ -21,16 +21,16 @@ export interface Comment {
 
 export interface Media {
   id: string;
-  type: 'video' | 'photo';
+  type: 'video' | 'photo' | 'text';
   title: string;
   description: string;
-  url: string;
-  thumbnailUrl: string;
+  url?: string;
+  thumbnailUrl?: string;
   user: User;
   createdAt: Date;
   views: number;
   likes: number;
   comments: Omit<Comment, 'user' | 'mediaContentId'>[];
-  imageHint: string;
-  mediaUrl: string;
+  imageHint?: string;
+  mediaUrl?: string;
 }

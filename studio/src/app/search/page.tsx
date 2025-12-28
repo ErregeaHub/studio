@@ -123,9 +123,9 @@ function SearchContent() {
                     key={post.id} 
                     post={{
                       id: post.id.toString(),
-                      content: post.title || post.description || '',
-                      mediaUrl: post.media_url,
-                      mediaType: post.type,
+                      content: post.description || post.title || '',
+                      mediaUrl: post.media_url || undefined,
+                      mediaType: (post.type as 'photo' | 'video' | 'text') || 'photo',
                       createdAt: new Date(post.created_at),
                       user: {
                         name: post.display_name || post.username,

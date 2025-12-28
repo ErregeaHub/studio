@@ -28,24 +28,24 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       canonical: `/media/${id}`,
     },
     openGraph: {
-      title: media.title,
+      title: media.title || 'Post',
       description: media.description,
       url: `${baseUrl}/media/${id}`,
       type: media.type === 'video' ? 'video.other' : 'article',
-      images: [
+      images: media.thumbnail_url ? [
         {
           url: media.thumbnail_url,
           width: 1200,
           height: 630,
-          alt: media.title,
+          alt: media.title || 'Post',
         },
-      ],
+      ] : [],
     },
     twitter: {
       card: 'summary_large_image',
-      title: media.title,
+      title: media.title || 'Post',
       description: media.description,
-      images: [media.thumbnail_url],
+      images: media.thumbnail_url ? [media.thumbnail_url] : [],
     },
   };
 }
@@ -61,12 +61,13 @@ export default async function MediaLayout({ params, children }: Props) {
 
   const structuredData = {
     '@context': 'https://schema.org',
-    '@type': media.type === 'video' ? 'VideoObject' : 'ImageObject',
-    name: media.title,
+    '@type': media.type === 'video' ? 'VideoObject' : media.type === 'photo' ? 'ImageObject' : 'SocialMediaPosting',
+    name: media.title || 'Post',
     description: media.description,
-    thumbnailUrl: media.thumbnail_url,
-    contentUrl: media.media_url,
+    thumbnailUrl: media.thumbnail_url || undefined,
+    contentUrl: media.media_url || undefined,
     uploadDate: media.created_at,
+    articleBody: media.type === 'text' ? media.description : undefined,
     author: {
       '@type': 'Person',
       name: media.display_name,

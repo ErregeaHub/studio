@@ -208,14 +208,23 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
         />
       );
     }
-    return (
+    if (media.type === 'photo') {
+      return (
         <Image
           src={media.media_url}
-          alt={media.title}
+          alt={media.title || 'Photo post'}
           fill
           className="object-contain"
         />
-    )
+      );
+    }
+    return (
+      <div className="flex items-center justify-center h-full p-8 text-center bg-secondary/10">
+        <p className="text-xl md:text-2xl font-medium leading-relaxed italic text-foreground/80">
+          "{media.description}"
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -223,15 +232,21 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
       <Breadcrumbs 
         items={[
           { label: 'Discover', href: '/discover' },
-          { label: media.type === 'video' ? 'Videos' : 'Photos', href: media.type === 'video' ? '/videos' : '/photos' },
-          { label: media.title }
+          { label: media.type === 'video' ? 'Videos' : media.type === 'photo' ? 'Photos' : 'Posts', href: media.type === 'video' ? '/videos' : media.type === 'photo' ? '/photos' : '/discover' },
+          { label: media.title || 'Post' }
         ]}
         className="mb-6"
       />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <Card className="overflow-hidden border-none bg-black ring-1 ring-border/50">
-            <div className="relative aspect-video w-full">
+          <Card className={cn(
+            "overflow-hidden border-none bg-black ring-1 ring-border/50",
+            media.type === 'text' && "bg-background"
+          )}>
+            <div className={cn(
+              "relative w-full",
+              media.type === 'text' ? "min-h-[200px]" : "aspect-video"
+            )}>
               {renderMedia()}
             </div>
           </Card>
@@ -240,9 +255,12 @@ export default function MediaPage({ params }: { params: Promise<{ id: string }> 
               <Badge variant="secondary" className="capitalize px-3 py-0.5 rounded-full text-[10px] font-bold tracking-wider">{media.type}</Badge>
               <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{formatDistanceToNow(new Date(media.created_at), { addSuffix: true })}</span>
             </div>
-            <h1 className="font-heading text-2xl md:text-4xl font-black uppercase tracking-tight">{media.title}</h1>
-            <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">{media.description}</p>
-            
+            {media.title && media.title !== 'Text Post' && (
+              <h1 className="font-heading text-2xl md:text-4xl font-black uppercase tracking-tight">{media.title}</h1>
+            )}
+            {media.type !== 'text' && (
+              <p className="mt-4 text-base md:text-lg text-muted-foreground leading-relaxed">{media.description}</p>
+            )}
             <div className="mt-8 flex items-center justify-between border-y border-border/50 py-4">
               <div className="flex items-center gap-2 md:gap-4">
                  <Button variant="ghost" size="sm" className="flex items-center gap-2 rounded-full hover:bg-primary/10 hover:text-primary transition-colors" onClick={handleLike} disabled={!user}>

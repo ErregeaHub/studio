@@ -17,7 +17,7 @@ interface FeedPostProps {
     id: string;
     content: string;
     mediaUrl?: string;
-    mediaType?: 'photo' | 'video';
+    mediaType?: 'photo' | 'video' | 'text';
     createdAt: Date;
     user: {
       name: string;

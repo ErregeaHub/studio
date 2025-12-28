@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     const thumbnailFile = formData.get('thumbnail') as File | null;
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const type = formData.get('type') as 'photo' | 'video';
+    const type = formData.get('type') as 'photo' | 'video' | 'text';
 
     // Get the authenticated user from Supabase
     const { createClient } = await import('@/lib/supabase/server');
@@ -61,38 +61,37 @@ export async function POST(request: Request) {
 
     const uploader_id = dbUser.id;
 
-    if (!file) {
-      return NextResponse.json({ error: 'File is required' }, { status: 400 });
-    }
+    let media_url = '';
+    let thumbnail_url = '';
 
-    // Upload main file to Vercel Blob
-    const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9_.-]/g, '-');
-    const blob = await put(`uploads/${Date.now()}-${sanitizedFilename}`, file, {
-      access: 'public',
-    });
-    const media_url = blob.url;
-
-    let thumbnail_url: string;
-    if (thumbnailFile) {
-      const thumbBlob = await put(`uploads/thumb-${Date.now()}.jpg`, thumbnailFile, {
+    if (file) {
+      // Upload main file to Vercel Blob
+      const sanitizedFilename = file.name.replace(/[^a-zA-Z0-9_.-]/g, '-');
+      const blob = await put(`uploads/${Date.now()}-${sanitizedFilename}`, file, {
         access: 'public',
       });
-      thumbnail_url = thumbBlob.url;
-    } else if (type === 'video') {
-      // Use a placeholder for videos if no thumbnail is provided or generated
-      thumbnail_url = '/images/video-placeholder.svg';
-    } else {
-      thumbnail_url = media_url;
+      media_url = blob.url;
+
+      if (thumbnailFile) {
+        const thumbBlob = await put(`uploads/thumb-${Date.now()}.jpg`, thumbnailFile, {
+          access: 'public',
+        });
+        thumbnail_url = thumbBlob.url;
+      } else if (type === 'video') {
+        thumbnail_url = '/images/video-placeholder.svg';
+      } else {
+        thumbnail_url = media_url;
+      }
     }
 
     const mediaRepo = new MediaRepository();
     const newMedia = await mediaRepo.create({
       uploader_id,
       type,
-      title,
+      title: title || (type === 'text' ? 'Text Post' : 'Untitled'),
       description,
-      media_url,
-      thumbnail_url,
+      media_url: media_url || null,
+      thumbnail_url: thumbnail_url || null,
     });
 
     return NextResponse.json(newMedia, { status: 201 });

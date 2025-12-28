@@ -96,25 +96,20 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
     try {
       const formData = new FormData();
       
-      if (!selectedFile) {
-        toast({
-          title: "File required",
-          description: "Please select an image or video to post.",
-          variant: "destructive"
-        });
-        setIsSubmitting(false);
-        return;
+      const type = selectedFile 
+        ? (selectedFile.type.startsWith('video') ? 'video' : 'photo')
+        : 'text';
+
+      if (selectedFile) {
+        formData.append('file', selectedFile);
       }
 
-      formData.append('file', selectedFile);
       formData.append('title', ''); // Title is no longer used, but kept for DB compatibility
       formData.append('description', content);
       formData.append('uploader_id', user.id);
-      
-      const fileType = selectedFile.type.startsWith('video') ? 'video' : 'photo';
-      formData.append('type', fileType);
+      formData.append('type', type);
 
-      if (fileType === 'video') {
+      if (type === 'video' && selectedFile) {
         try {
           const thumbnailBlob = await generateVideoThumbnail(selectedFile);
           if (thumbnailBlob) {
@@ -268,11 +263,11 @@ export default function CreatePost({ onPostCreated }: CreatePostProps) {
                 size="sm"
                 className={cn(
                   "rounded-full px-6 font-bold uppercase tracking-widest font-action transition-all shadow-md h-9",
-                  content.trim() && selectedFile && !isSubmitting && !isOverLimit 
+                  content.trim() && !isSubmitting && !isOverLimit 
                     ? "bg-primary active:bg-primary/90 text-white translate-y-0 opacity-100" 
                     : "bg-primary/30 text-white/50 cursor-not-allowed translate-y-0.5 opacity-70"
                 )}
-                disabled={!content.trim() || !selectedFile || isSubmitting || isOverLimit}
+                disabled={!content.trim() || isSubmitting || isOverLimit}
                 onClick={handleSubmit}
               >
                 {isSubmitting ? (

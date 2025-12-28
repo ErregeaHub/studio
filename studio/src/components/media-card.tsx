@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import type { Media } from '@/lib/types';
-import { Eye, Heart, Clapperboard, Camera } from 'lucide-react';
+import { Eye, Heart, Clapperboard, Camera, Type } from 'lucide-react';
 
 interface MediaCardProps {
   media: Media;
@@ -18,8 +18,14 @@ export default function MediaCard({ media }: MediaCardProps) {
     <Link href={`/media/${media.id}`} className="group block active:scale-[0.98] transition-transform duration-200">
       <Card className="overflow-hidden border-none shadow-none bg-secondary/10">
         <CardContent className="p-0">
-          <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center rounded-xl">
-            {thumbnailUrl ? (
+          <div className="relative aspect-video overflow-hidden bg-muted flex items-center justify-center rounded-xl p-4">
+            {media.type === 'text' ? (
+              <div className="flex flex-col items-center justify-center text-center">
+                <p className="text-sm font-medium line-clamp-3 text-foreground/80 italic">
+                  "{media.description}"
+                </p>
+              </div>
+            ) : thumbnailUrl ? (
               <Image
                 src={media.type === 'video' && media.thumbnailUrl === media.mediaUrl
                   ? '/images/video-placeholder.jpg'
@@ -44,10 +50,12 @@ export default function MediaCard({ media }: MediaCardProps) {
             <Badge variant="secondary" className="absolute right-2 top-2 z-10 bg-background/80 backdrop-blur-sm border-none">
               {media.type === 'video' ? (
                 <Clapperboard className="mr-1 h-3 w-3" />
-              ) : (
+              ) : media.type === 'photo' ? (
                 <Camera className="mr-1 h-3 w-3" />
+              ) : (
+                <Type className="mr-1 h-3 w-3" />
               )}
-              {media.type === 'video' ? 'Video' : 'Photo'}
+              <span className="capitalize">{media.type}</span>
             </Badge>
           </div>
         </CardContent>

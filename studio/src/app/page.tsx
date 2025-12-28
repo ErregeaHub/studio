@@ -114,9 +114,9 @@ export default function Home() {
                 {allPosts.map((mediaItem) => (
                   <FeedPost key={mediaItem.id} post={{
                     id: mediaItem.id.toString(),
-                    content: mediaItem.description || mediaItem.title || 'Check out this new media!',
-                    mediaUrl: mediaItem.media_url || mediaItem.thumbnail_url,
-                    mediaType: (mediaItem.type as 'photo' | 'video') || 'photo',
+                    content: mediaItem.description || mediaItem.title || '',
+                    mediaUrl: mediaItem.media_url || undefined,
+                    mediaType: (mediaItem.type as 'photo' | 'video' | 'text') || 'photo',
                     createdAt: new Date(mediaItem.created_at),
                     user: {
                       name: mediaItem.display_name || 'Anonymous',

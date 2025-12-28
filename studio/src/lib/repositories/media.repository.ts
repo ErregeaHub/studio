@@ -5,11 +5,11 @@ import { MediaContentInput, MediaContentSchema } from '../validations';
 export interface MediaContent {
   id: number;
   uploader_id: number;
-  type: 'photo' | 'video';
+  type: 'photo' | 'video' | 'text';
   title: string;
   description?: string;
-  media_url: string;
-  thumbnail_url: string;
+  media_url?: string;
+  thumbnail_url?: string;
   views_count: number;
   likes_count: number;
   created_at: Date;
@@ -31,8 +31,8 @@ export class MediaRepository extends BaseRepository<MediaContent> {
         validatedData.type,
         validatedData.title,
         validatedData.description ?? null,
-        validatedData.media_url,
-        validatedData.thumbnail_url
+        validatedData.media_url ?? null,
+        validatedData.thumbnail_url ?? null
       ]
     );
 
